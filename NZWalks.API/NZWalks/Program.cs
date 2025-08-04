@@ -1,4 +1,6 @@
 
+using Microsoft.EntityFrameworkCore;
+using NZWalk.DataAccess.Data;
 using NZWalks.MiddleWare;
 
 namespace NZWalks
@@ -12,13 +14,21 @@ namespace NZWalks
             // Add services to the container.
 
             builder.Services.AddControllers();
-            
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-            builder.Services.AddOpenApi();
 
+            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+            #region Dbcontext Adding
+            builder.Services.AddDbContext<ApplicationDBContext>(option =>
+            {
+                option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+            });
+            #endregion
+
+
+
+
+            builder.Services.AddOpenApi();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
