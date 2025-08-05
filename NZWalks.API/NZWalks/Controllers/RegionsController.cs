@@ -6,6 +6,7 @@ using NZWalk.DataAccess.Model.DTOs;
 
 namespace NZWalks.Controllers
 {
+
     [Route("api/[controller]")]
     [ApiController]
     public class RegionsController : ControllerBase
@@ -26,19 +27,17 @@ namespace NZWalks.Controllers
                 return Ok(region);
             }
             return BadRequest();
-
         }
-        [HttpGet("Get_By_ID {Id:Guid}")]
+
+        [HttpGet("GetByID {Id:Guid}")]
         public IActionResult GetById([FromRoute] Guid Id)
         {
             var region = context.Regions.Find(Id);
             if (region == null)
             {
-
                 return Ok(region);
             }
             return BadRequest();
-
         }
 
         [HttpPost("Create")]

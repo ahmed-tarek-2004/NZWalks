@@ -1,7 +1,12 @@
-
 using Microsoft.EntityFrameworkCore;
 using NZWalk.DataAccess.Data;
+using NZWalk.DataAccess.IRepository;
+using NZWalk.DataAccess.Repository;
+using NZWalk.Services.IServices;
+using NZWalk.Services.Services;
 using NZWalks.MiddleWare;
+using NZWalk.Services.Mapping;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace NZWalks
 {
@@ -26,7 +31,13 @@ namespace NZWalks
             });
             #endregion
 
+            #region Depemdenci Injection
 
+            builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+            builder.Services.AddScoped<IRegionServices, RegionServices>();
+            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            #endregion
 
 
             builder.Services.AddOpenApi();
