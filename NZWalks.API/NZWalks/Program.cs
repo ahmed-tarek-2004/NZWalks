@@ -7,6 +7,7 @@ using NZWalk.Services.Services;
 using NZWalks.MiddleWare;
 using NZWalk.Services.Mapping;
 using Microsoft.Extensions.DependencyInjection;
+using AutoMapper;
 
 namespace NZWalks
 {
@@ -35,7 +36,7 @@ namespace NZWalks
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IRegionServices, RegionServices>();
-            builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+            builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
             #endregion
 
@@ -57,7 +58,8 @@ namespace NZWalks
 
             app.UseAuthorization();
 
-            app.UseMiddleware<TimeEstimate>();
+           app.UseMiddleware<TimeEstimate>();
+           
             app.MapControllers();
 
             app.Run();

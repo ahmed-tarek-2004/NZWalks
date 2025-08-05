@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-
+using AutoMapper;
 namespace NZWalks.MiddleWare
 {
     public class TimeEstimate
@@ -17,7 +17,7 @@ namespace NZWalks.MiddleWare
         {
             var time = new Stopwatch();
             time.Start();
-            await Next(context);
+            await Next.Invoke(context);
             time.Stop();
             logger.LogDebug($"Path From : {context.Request.Path}");
             logger.LogInformation($"Time Taken For Reques : {time.ElapsedMilliseconds}");

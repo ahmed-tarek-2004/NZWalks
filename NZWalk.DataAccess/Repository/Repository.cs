@@ -17,7 +17,7 @@ namespace NZWalk.DataAccess.Repository
         public Repository(ApplicationDBContext context)
         {
             this.context = context;
-            db=context.Set<T>();
+            db = context.Set<T>();
         }
         public async Task Add(T entity)
         {
@@ -26,8 +26,8 @@ namespace NZWalk.DataAccess.Repository
 
         public async Task<T> Get(Expression<Func<T, bool>> filter)
         {
-            IQueryable<T> query=db.Where(filter);
-         
+            IQueryable<T> query = db.Where(filter);
+
 
             return await query.FirstOrDefaultAsync();
 
@@ -51,15 +51,15 @@ namespace NZWalk.DataAccess.Repository
         }
         public Task Remove(T entity)
         {
-           db.Remove(entity);
+            db.Remove(entity);
             return Task.CompletedTask;
         }
 
-        public Task RemoveRange(IEnumerable<T> entity)
+        public  Task RemoveRange(IEnumerable<T> entity)
         {
             db.RemoveRange(entity);
             return Task.CompletedTask;
         }
-       
+
     }
 }

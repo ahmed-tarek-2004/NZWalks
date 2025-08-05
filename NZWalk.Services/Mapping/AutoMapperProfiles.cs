@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace NZWalk.Services.Mapping
 {
-    public class NZWalksMappingProfile : Profile
+    public class AutoMapperProfiles : Profile
     {
-        public NZWalksMappingProfile()
+        public AutoMapperProfiles()
         {
             CreateMap<RegionDTO, Region>().ReverseMap();
             CreateMap<AddRegionRequestDto, Region>().ReverseMap();

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NZWalk.DataAccess.Data;
 using NZWalk.DataAccess.Model.Domin;
 using NZWalk.DataAccess.Model.DTOs;
+using NZWalk.Services.IServices;
 
 namespace NZWalks.Controllers
 {
@@ -11,84 +12,66 @@ namespace NZWalks.Controllers
     [ApiController]
     public class RegionsController : ControllerBase
     {
-        private readonly ApplicationDBContext context;
+        private readonly IRegionServices services;
 
-        public RegionsController(ApplicationDBContext context)
+        public RegionsController(ApplicationDBContext context, IRegionServices services)
         {
-            this.context = context;
+            // this.context = context;
+            this.services = services;
         }
+
         [HttpGet("GetAll")]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var region = context.Regions.ToList();
-            if (region != null)
+            var regions = await services.GetALL();
+            if (regions == null)
             {
-
-                return Ok(region);
+                return BadRequest();
             }
-            return BadRequest();
+            return Ok(regions);
         }
 
-        [HttpGet("GetByID {Id:Guid}")]
-        public IActionResult GetById([FromRoute] Guid Id)
+        [HttpGet("GetByID/{Id:Guid}")]
+        public async Task<IActionResult> GetById([FromRoute] Guid Id)
         {
-            var region = context.Regions.Find(Id);
-            if (region == null)
+            var regions = await services.Get(Id);
+            if (regions == null)
             {
-                return Ok(region);
+                return BadRequest();
             }
-            return BadRequest();
+            return Ok(regions);
         }
 
         [HttpPost("Create")]
-        public IActionResult Create([FromBody] AddRegionRequestDto dto)
+        public async Task<IActionResult> Create([FromBody] AddRegionRequestDto dto)
         {
-            var region = new Region()
+            if (dto == null)
             {
-                Name = dto.Name,
-                Code = dto.Code,
-                RegionImageUrl = dto.RegionImageUrl
-            };
-            context.Regions.Add(region);
-            context.SaveChanges();
-            var regoinDTO = new RegionDTO()
-            {
-                Id = region.Id,
-                Name = region.Name,
-                Code = region.Code,
-                RegionImageUrl = region.RegionImageUrl
-            };
-            return CreatedAtAction(nameof(GetById), new { Id = region.Id }, regoinDTO);
+                return BadRequest();
+            }
+            var region = await services.Add(dto);
+            return CreatedAtAction(nameof(GetById), new { Id = region.Id },region);
         }
 
         [HttpPut("Update/{id:guid}")]
-        public IActionResult Update([FromRoute]Guid id, [FromBody] UpdateRegionRequestDto dto)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto dto)
         {
-            var region = context.Regions.Find(id);
-            if (region == null||dto is null)
+            var region = await services.Update(id, dto);
+            if(region is null)
             {
                 return BadRequest();
             }
-            region.Name = dto.Name;
-            if(dto.RegionImageUrl != null) 
-            region.RegionImageUrl = dto.RegionImageUrl;
-            region.Code = dto.Code;
-            context.SaveChanges();
-
-            return Ok("Updated");
+            return Ok($"Updated \n{region}");
         }
 
         [HttpDelete("Delete/{ID:Guid}")]
-        public IActionResult Delete([FromRoute(Name ="ID")]Guid id)
+        public async Task<IActionResult> Delete([FromRoute(Name = "ID")] Guid id)
         {
-            var region = context.Regions.FirstOrDefault(r=>r.Id==id);
-            if(region == null)
-            {
-                return BadRequest();
-            }
-            context.Remove(region);
-            context.SaveChanges();
+            var region=await services.Delete(id);
+            if(region is not null)
             return Ok("Deleted");
+            return BadRequest();
+
         }
     }
 }
