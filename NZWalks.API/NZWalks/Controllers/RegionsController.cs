@@ -79,8 +79,8 @@ namespace NZWalks.Controllers
             return Ok("Updated");
         }
 
-        [HttpDelete("Delete/{id:Guid}")]
-        public IActionResult Delete([FromRoute]Guid id)
+        [HttpDelete("Delete/{ID:Guid}")]
+        public IActionResult Delete([FromRoute(Name ="ID")]Guid id)
         {
             var region = context.Regions.FirstOrDefault(r=>r.Id==id);
             if(region == null)
