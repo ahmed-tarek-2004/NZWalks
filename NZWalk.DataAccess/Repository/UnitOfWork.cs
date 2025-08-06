@@ -13,8 +13,8 @@ namespace NZWalk.DataAccess.Repository
     public class UnitOfWork:IUnitOfWork
     {
         private readonly ApplicationDBContext _context;
-        public IRegionRepository region{ get; private set; }
-        public IWalkRepository walk{ get; private set; }
+        public IRegionRepository region { get; private set; }
+        public IWalkRepository walk { get; private set; }
 
         private readonly ConcurrentDictionary<Type, object> dic;
 

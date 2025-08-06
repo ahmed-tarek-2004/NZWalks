@@ -4,6 +4,7 @@ using NZWalk.DataAccess.Data;
 using NZWalk.DataAccess.Model.Domin;
 using NZWalk.DataAccess.Model.DTOs;
 using NZWalk.Services.IServices;
+using NZWalks.Validation;
 
 namespace NZWalks.Controllers
 {
@@ -43,33 +44,36 @@ namespace NZWalks.Controllers
         }
 
         [HttpPost("Create")]
+        [ServiceFilter(typeof(ValidationFilter))]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto dto)
         {
-            if (dto == null)
-            {
-                return BadRequest();
-            }
-            var region = await services.Add(dto);
-            return CreatedAtAction(nameof(GetById), new { Id = region.Id },region);
+    
+                if (dto == null)
+                {
+                    return BadRequest();
+                }
+                var region = await services.Add(dto);
+                return CreatedAtAction(nameof(GetById), new { Id = region.Id }, region);
         }
 
         [HttpPut("Update/{id:guid}")]
+        [ServiceFilter(typeof(ValidationFilter))]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto dto)
         {
-            var region = await services.Update(id, dto);
-            if(region is null)
-            {
-                return BadRequest();
-            }
-            return Ok($"Updated \n{region}");
+                var region = await services.Update(id, dto);
+                if (region is null)
+                {
+                    return BadRequest();
+                }
+                return Ok($"Updated \n{region}");
         }
 
         [HttpDelete("Delete/{ID:Guid}")]
         public async Task<IActionResult> Delete([FromRoute(Name = "ID")] Guid id)
         {
-            var region=await services.Delete(id);
-            if(region is not null)
-            return Ok("Deleted");
+            var region = await services.Delete(id);
+            if (region is not null)
+                return Ok("Deleted");
             return BadRequest();
         }
     }

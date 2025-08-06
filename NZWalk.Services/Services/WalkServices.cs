@@ -56,7 +56,11 @@ namespace NZWalk.Services.Services
         }
         public async Task<IEnumerable<WalkDto>> GetALL(Expression<Func<Walk, bool>>? filter = null)
         {
-            var Walks = await unitOfWork.walk.GetAll( filter,IncludeProperities: "Region,Difficulty");
+            //var Walks = await unitOfWork.Repository<Walk>().GetAll(filter,IncludeProperities: "Region,Difficulty");
+            
+            var Walks = await unitOfWork.walk.GetAll(filter,IncludeProperities: "Region,Difficulty");
+            
+           
             return map.Map<IEnumerable<WalkDto>>(Walks);
         }
         public async Task<Walk> Update(Guid id, UpdateWalkDto WalkDto)

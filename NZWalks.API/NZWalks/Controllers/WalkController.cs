@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NZWalk.DataAccess.Data;
 using NZWalk.DataAccess.Model.DTOs;
 using NZWalk.Services.IServices;
+using NZWalks.Validation;
 
 namespace NZWalks.Controllers
 {
@@ -42,25 +43,30 @@ namespace NZWalks.Controllers
         }
 
         [HttpPost("Create")]
+        [ServiceFilter(typeof(ValidationFilter))]
         public async Task<IActionResult> Create([FromBody] AddWalkDto dto)
         {
-            if (dto == null)
-            {
-                return BadRequest();
-            }
-            var Walk = await services.Add(dto);
-            return CreatedAtAction(nameof(GetById), new { Id = Walk.Id }, Walk);
+           
+                if (dto == null)
+                {
+                    return BadRequest();
+                }
+                var Walk = await services.Add(dto);
+                return CreatedAtAction(nameof(GetById), new { Id = Walk.Id }, Walk);
+       
         }
 
         [HttpPut("Update/{id:guid}")]
+        [ServiceFilter(typeof(ValidationFilter))]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateWalkDto dto)
         {
-            var Walk = await services.Update(id, dto);
-            if (Walk == null)
-            {
-                return BadRequest();
-            }
-            return Ok($"Updated \n{Walk}");
+           
+                var Walk = await services.Update(id, dto);
+                if (Walk == null)
+                {
+                    return BadRequest();
+                }
+                return Ok($"Updated \n{Walk}");
         }
 
         [HttpDelete("Delete/{ID:Guid}")]
