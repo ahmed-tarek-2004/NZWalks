@@ -1,16 +1,14 @@
-﻿using System;
+﻿using NZWalk.DataAccess.Model.Domin;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace NZWalk.DataAccess.Model.Domin
+namespace NZWalk.DataAccess.Model.DTOs
 {
-    public class Walk
+    public class WalkDto
     {
-        [Key]
         public Guid Id { get; set; }
         public string Name { get; set; } = null!;
         public string Description { get; set; } = null!;
@@ -18,10 +16,9 @@ namespace NZWalk.DataAccess.Model.Domin
         public string? WalkImageUrl { get; set; }
         public Guid DifficultyId { get; set; }
         public Guid RegionId { get; set; }
-
-        //[JsonIgnore]
         public Difficulty Difficulty { get; set; }
         //[JsonIgnore]
         public Region Region { get; set; }
+
     }
 }

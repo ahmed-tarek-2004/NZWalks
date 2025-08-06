@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NZWalk.DataAccess.Data;
 using NZWalk.DataAccess.IRepository;
+using NZWalk.DataAccess.Model;
+using NZWalk.DataAccess.Model.Domin;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,23 +24,37 @@ namespace NZWalk.DataAccess.Repository
         public async Task Add(T entity)
         {
             await db.AddAsync(entity);
+
         }
 
-        public async Task<T> Get(Expression<Func<T, bool>> filter)
+        public async Task<T> Get(Expression<Func<T, bool>> filter, string? IncludeProperities = null)
         {
             IQueryable<T> query = db.Where(filter);
 
-
+            if (!string.IsNullOrEmpty(IncludeProperities))
+            {
+                foreach (var include in IncludeProperities.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries)) 
+                {
+                    query = query.Include(include);
+                }
+            }
             return await query.FirstOrDefaultAsync();
 
         }
 
-        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null)
+        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null,string ?IncludeProperities=null)
         {
             IQueryable<T> query = db;
 
             if (filter != null)
                 query = query.Where(filter);
+            if (!string.IsNullOrEmpty(IncludeProperities))
+            {
+                foreach (var include in IncludeProperities.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                   query= query.Include(include);
+                }
+            }
 
             return await query.ToListAsync();
         }
@@ -55,7 +71,7 @@ namespace NZWalk.DataAccess.Repository
             return Task.CompletedTask;
         }
 
-        public  Task RemoveRange(IEnumerable<T> entity)
+        public Task RemoveRange(IEnumerable<T> entity)
         {
             db.RemoveRange(entity);
             return Task.CompletedTask;

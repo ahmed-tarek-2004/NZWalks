@@ -36,6 +36,7 @@ namespace NZWalks
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IRegionServices, RegionServices>();
+            builder.Services.AddScoped<IWalkServices, WalkServices>();
             builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
 
             #endregion

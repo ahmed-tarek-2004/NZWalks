@@ -1,20 +1,19 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NZWalk.DataAccess.Data;
-using NZWalk.DataAccess.Model.Domin;
 using NZWalk.DataAccess.Model.DTOs;
 using NZWalk.Services.IServices;
 
 namespace NZWalks.Controllers
 {
-
     [Route("api/[controller]")]
     [ApiController]
-    public class RegionsController : ControllerBase
+    public class WalkController : ControllerBase
     {
-        private readonly IRegionServices services;
 
-        public RegionsController(ApplicationDBContext context, IRegionServices services)
+        private readonly IWalkServices services;
+
+        public WalkController(ApplicationDBContext context, IWalkServices services)
         {
             // this.context = context;
             this.services = services;
@@ -23,53 +22,53 @@ namespace NZWalks.Controllers
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll()
         {
-            var regions = await services.GetALL();
-            if (regions == null)
+            var Walks = await services.GetALL();
+            if (Walks == null)
             {
                 return BadRequest();
             }
-            return Ok(regions);
+            return Ok(Walks);
         }
 
         [HttpGet("GetById/{Id:Guid}")]
         public async Task<IActionResult> GetById([FromRoute] Guid Id)
         {
-            var regions = await services.Get(Id);
-            if (regions == null)
+            var Walks = await services.Get(Id);
+            if (Walks == null)
             {
                 return BadRequest();
             }
-            return Ok(regions);
+            return Ok(Walks);
         }
 
         [HttpPost("Create")]
-        public async Task<IActionResult> Create([FromBody] AddRegionRequestDto dto)
+        public async Task<IActionResult> Create([FromBody] AddWalkDto dto)
         {
             if (dto == null)
             {
                 return BadRequest();
             }
-            var region = await services.Add(dto);
-            return CreatedAtAction(nameof(GetById), new { Id = region.Id },region);
+            var Walk = await services.Add(dto);
+            return CreatedAtAction(nameof(GetById), new { Id = Walk.Id }, Walk);
         }
 
         [HttpPut("Update/{id:guid}")]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto dto)
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateWalkDto dto)
         {
-            var region = await services.Update(id, dto);
-            if(region is null)
+            var Walk = await services.Update(id, dto);
+            if (Walk == null)
             {
                 return BadRequest();
             }
-            return Ok($"Updated \n{region}");
+            return Ok($"Updated \n{Walk}");
         }
 
         [HttpDelete("Delete/{ID:Guid}")]
         public async Task<IActionResult> Delete([FromRoute(Name = "ID")] Guid id)
         {
-            var region=await services.Delete(id);
-            if(region is not null)
-            return Ok("Deleted");
+            var Walk = await services.Delete(id);
+            if (Walk is not null)
+                return Ok("Deleted");
             return BadRequest();
         }
     }

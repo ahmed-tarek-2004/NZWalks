@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NZWalk.DataAccess.Model;
+using System;
 using System.Collections.Generic;
 using System.Formats.Tar;
 using System.Linq;
@@ -8,10 +9,10 @@ using System.Threading.Tasks;
 
 namespace NZWalk.DataAccess.IRepository
 {
-    public interface IRepository<T>where T : class
+    public interface IRepository<T> where T : class
     {
-        Task<T> Get(Expression<Func<T, bool>> filter);
-        Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>> ?filter=null);
+        Task<T> Get(Expression<Func<T, bool>> filter, string? IncludeProperities = null);
+        Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>> ?filter=null,string?IncludeProperities=null);
         Task Add(T entity);
         Task Update(T entity);
         Task Remove (T entity);
