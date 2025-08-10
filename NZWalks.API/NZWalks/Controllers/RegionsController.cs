@@ -22,9 +22,9 @@ namespace NZWalks.Controllers
         }
 
         [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery]string? Properties=null)
         {
-            var regions = await services.GetALL();
+            var regions = await services.GetALL(Properties);
             if (regions == null)
             {
                 return BadRequest();

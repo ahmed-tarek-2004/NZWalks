@@ -2,6 +2,7 @@
 using NZWalk.DataAccess.IRepository;
 using NZWalk.DataAccess.Model.Domin;
 using NZWalk.DataAccess.Model.DTOs;
+using NZWalk.Services.Extension;
 using NZWalk.Services.IServices;
 using NZWalk.Services.Mapping;
 using System.Collections.Concurrent;
@@ -49,9 +50,10 @@ namespace NZWalk.Services.Services
             var regionDto = map.Map<RegionDTO>(region);
             return regionDto;
         }
-        public async Task<IEnumerable<RegionDTO>> GetALL(Expression<Func<Region, bool>>? filter = null)
+        public async Task<IEnumerable<RegionDTO>> GetALL(string? Properity = null)
         {
-            var regions = await unitOfWork.region.GetAll(filter);
+            var regions = await unitOfWork.region.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterByRegionName());
+
             return map.Map<IEnumerable<RegionDTO>>(regions);
         }
         public async Task<Region> Update(Guid id, UpdateRegionRequestDto regionDto)

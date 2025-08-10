@@ -4,16 +4,20 @@ using NZWalk.DataAccess.Model.Domin;
 using NZWalk.DataAccess.Model.DTOs;
 using NZWalk.DataAccess.Model.DTOs;
 using NZWalk.Services.IServices;
+using NZWalk.Services.Extension;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
+using Microsoft.EntityFrameworkCore;
 
 namespace NZWalk.Services.Services
 {
-    public class WalkServices: IWalkServices
+
+    public class WalkServices : IWalkServices
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper map;
@@ -54,21 +58,20 @@ namespace NZWalk.Services.Services
             var WalkDto = map.Map<WalkDto>(Walk);
             return WalkDto;
         }
-        public async Task<IEnumerable<WalkDto>> GetALL(Expression<Func<Walk, bool>>? filter = null)
+        public async Task<IEnumerable<WalkDto>> GetALL(string? Properity = null, string? order = null, bool? IsDescending = false, int PageNum = 1, int PageSize = 1000)
         {
-            //var Walks = await unitOfWork.Repository<Walk>().GetAll(filter,IncludeProperities: "Region,Difficulty");
-            
-            var Walks = await unitOfWork.walk.GetAll(filter,IncludeProperities: "Region,Difficulty");
-            
-           
+            var Walks = await unitOfWork.walk.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterWalkByName(),
+                IncludeProperities: "Region,Difficulty", order, IsDescending);
+            var PageResult = (PageNum - 1) * (PageSize);
+            Walks = Walks.Skip(PageResult).Take(PageSize).ToList();
             return map.Map<IEnumerable<WalkDto>>(Walks);
         }
         public async Task<Walk> Update(Guid id, UpdateWalkDto WalkDto)
         {
-            var Walk = await unitOfWork.walk.Get(r => r.Id == id,IncludeProperities:"Region,Difficulty");
+            var Walk = await unitOfWork.walk.Get(r => r.Id == id, IncludeProperities: "Region,Difficulty");
             if (Walk != null)
             {
-                map.Map(WalkDto,Walk);
+                map.Map(WalkDto, Walk);
                 await unitOfWork.SaveChanges();
                 return Walk;
             }

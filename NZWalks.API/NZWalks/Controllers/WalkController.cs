@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NZWalk.DataAccess.Data;
 using NZWalk.DataAccess.Model.DTOs;
@@ -20,10 +21,12 @@ namespace NZWalks.Controllers
             this.services = services;
         }
 
+        [Authorize(Roles ="Reader,Writer")]
         [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] string? Properity, [FromQuery]string? order, [FromQuery]bool?isDescending=false,
+            [FromQuery]int PageNum =1 ,[FromQuery] int PageSize=1000)
         {
-            var Walks = await services.GetALL();
+            var Walks = await services.GetALL(Properity,order,isDescending,PageNum,PageSize);
             if (Walks == null)
             {
                 return BadRequest();
@@ -31,6 +34,7 @@ namespace NZWalks.Controllers
             return Ok(Walks);
         }
 
+        [Authorize(Roles = "Reader,Writer")]
         [HttpGet("GetById/{Id:Guid}")]
         public async Task<IActionResult> GetById([FromRoute] Guid Id)
         {
@@ -42,6 +46,7 @@ namespace NZWalks.Controllers
             return Ok(Walks);
         }
 
+        [Authorize(Roles = "Writer")]
         [HttpPost("Create")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<IActionResult> Create([FromBody] AddWalkDto dto)
@@ -55,7 +60,7 @@ namespace NZWalks.Controllers
                 return CreatedAtAction(nameof(GetById), new { Id = Walk.Id }, Walk);
        
         }
-
+        [Authorize(Roles = "Writer")]
         [HttpPut("Update/{id:guid}")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateWalkDto dto)
@@ -69,6 +74,7 @@ namespace NZWalks.Controllers
                 return Ok($"Updated \n{Walk}");
         }
 
+        [Authorize(Roles = "Writer")]
         [HttpDelete("Delete/{ID:Guid}")]
         public async Task<IActionResult> Delete([FromRoute(Name = "ID")] Guid id)
         {

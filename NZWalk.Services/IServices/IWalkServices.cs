@@ -12,7 +12,7 @@ namespace NZWalk.Services.IServices
     public interface IWalkServices
     {
         Task<WalkDto> Get(Guid id);
-        Task<IEnumerable<WalkDto>> GetALL(Expression<Func<Walk, bool>>? filter = null);
+        Task<IEnumerable<WalkDto>> GetALL(string? filter = null,string? order=null,bool ?IsDescending=false,int PageNum=1,int PageSize=1000);
         Task<Walk> Add(AddWalkDto Walk);
         Task<Walk> Update(Guid id, UpdateWalkDto Dto);
         Task<Walk> Delete(Guid id);

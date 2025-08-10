@@ -12,7 +12,7 @@ namespace NZWalk.Services.IServices
     public interface IRegionServices
     {
         Task<RegionDTO> Get(Guid id);
-        Task<IEnumerable<RegionDTO>> GetALL(Expression<Func<Region,bool>>?filter=null);
+        Task<IEnumerable<RegionDTO>> GetALL(string?filter=null);
         Task<Region> Add(AddRegionRequestDto region);
         Task<Region> Update(Guid id,UpdateRegionRequestDto requestDto);
         Task<Region> Delete(Guid id);
