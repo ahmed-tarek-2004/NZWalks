@@ -70,12 +70,12 @@ namespace NZWalks.Controllers
                 return Ok($"Updated \n{region}");
         }
 
-        [HttpDelete("Delete/{ID:Guid}")]
-        public async Task<IActionResult> Delete([FromRoute(Name = "ID")] Guid id)
+        [HttpDelete("Delete/{Id:Guid}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid Id)
         {
-            var region = await services.Delete(id);
+            var region = await services.Delete(Id);
             if (region is not null)
-                return Ok("Deleted");
+                return Ok(region);
             return BadRequest();
         }
     }
