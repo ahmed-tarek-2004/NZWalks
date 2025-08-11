@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Versioning;
+//using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -16,7 +16,7 @@ using NZWalk.DataAccess.Repository;
 using NZWalk.Services.IServices;
 using NZWalk.Services.Mapping;
 using NZWalk.Services.Services;
-using NZWalks.API.Configurations;
+//using NZWalks.API.Configurations;
 //using NZWalks.Configuration;
 using NZWalks.MiddleWare;
 using NZWalks.Validation;
@@ -30,6 +30,8 @@ namespace NZWalks
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+           
+            
             #region SeriLog
             var logger = new LoggerConfiguration()
                  .ReadFrom.Configuration(builder.Configuration)
@@ -46,20 +48,21 @@ namespace NZWalks
             builder.Services.AddHttpContextAccessor();
 
             #region APIVersioning
-            builder.Services.AddApiVersioning(options =>
-            {
-                options.AssumeDefaultVersionWhenUnspecified = true;
-                options.DefaultApiVersion = new ApiVersion(1, 0);
-                options.ReportApiVersions = true;
-                options.ApiVersionReader = new UrlSegmentApiVersionReader();
-            });
-            builder.Services.AddVersionedApiExplorer(options =>
-            {
-                options.GroupNameFormat = "'v'VVV";
-                options.SubstituteApiVersionInUrl = true;
-            });
+            //builder.Services.AddApiVersioning(options =>
+            //{
+            //    options.AssumeDefaultVersionWhenUnspecified = true;
+            //    options.DefaultApiVersion = new ApiVersion(1, 0);
+            //    options.ReportApiVersions = true;
+            //    options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            //});
+            //builder.Services.AddVersionedApiExplorer(options =>
+            //{
+            //    options.GroupNameFormat = "'v'VVV";
+            //    options.SubstituteApiVersionInUrl = true;
+            //});
             #endregion
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
+            //// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             #region Dbcontext Adding
             builder.Services.AddDbContext<ApplicationDBContext>(option =>
             {
@@ -135,9 +138,9 @@ namespace NZWalks
             builder.Services.AddSwaggerGen(swagger =>
             {
                 //This is to generate the Default UI of Swagger Documentation    
-                swagger.SwaggerDoc("v2", new OpenApiInfo
+                swagger.SwaggerDoc("v1", new OpenApiInfo
                 {
-                    Version = "v2",
+                    Version = "v1",
                     Title = "ASP.NET 9 Web API",
                     Description = "NZWalk Project"
                 });
@@ -168,23 +171,24 @@ namespace NZWalks
             });
             #endregion
 
-            builder.Services.ConfigureOptions<SwaggerOptionsConfiguration>();
+          //  builder.Services.ConfigureOptions<SwaggerOptionsConfiguration>();
             var app = builder.Build();
-            var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
+            //var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
                 app.UseSwagger();
-                app.UseSwaggerUI(options =>
-                {
-                    foreach (var description in provider.ApiVersionDescriptions)
-                    {
-                        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
-                            $"My API {description.GroupName.ToUpperInvariant()}");
-                    }
-                }
+                app.UseSwaggerUI(
+                //    options =>
+                //{
+                //    foreach (var description in provider.ApiVersionDescriptions)
+                //    {
+                //        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+                //            $"My API {description.GroupName.ToUpperInvariant()}");
+                //    }
+                //}
                 );
             }
 
