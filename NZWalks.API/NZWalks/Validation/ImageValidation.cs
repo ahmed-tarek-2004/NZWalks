@@ -9,12 +9,22 @@ namespace NZWalks.Validation
 {
     public class ImageValidation : ActionFilterAttribute
     {
+        private readonly ILogger<ImageValidation> logger;
+        //private readonly IMapper map;
+        public ImageValidation(ILogger<ImageValidation> logger)
+        {
+          
+            this.logger = logger;
+            // this.httpContextAccessor = httpContextAccessor;
+        }
         public override void OnActionExecuted(ActionExecutedContext context)
         {
+            base.OnActionExecuted(context);
         }
 
         public override void OnActionExecuting(ActionExecutingContext context)
         {
+          
             if (!context.ModelState.IsValid)
             {
                 context.Result = new BadRequestResult();

@@ -22,14 +22,16 @@ namespace NZWalks.Controllers
         }
 
         [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll([FromQuery]string? Properties=null)
+        public async Task<IActionResult> GetAll([FromQuery]string? Properties=null,[FromQuery]string?order=null
+            ,[FromQuery]bool?isDescending=false)
         {
-            var regions = await services.GetALL(Properties);
+            var regions = await services.GetALL(Properties,order,isDescending);
             if (regions == null)
             {
                 return BadRequest();
             }
-            return Ok(regions);
+            var ListResions = regions.ToList();
+            return Ok(ListResions);
         }
 
         [HttpGet("GetById/{Id:Guid}")]

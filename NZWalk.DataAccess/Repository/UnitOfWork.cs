@@ -1,4 +1,5 @@
-﻿using NZWalk.DataAccess.Data;
+﻿using Microsoft.Extensions.Logging;
+using NZWalk.DataAccess.Data;
 using NZWalk.DataAccess.IRepository;
 using NZWalk.DataAccess.Model.Domin;
 using System;
@@ -15,13 +16,15 @@ namespace NZWalk.DataAccess.Repository
         private readonly ApplicationDBContext _context;
         public IRegionRepository region { get; private set; }
         public IWalkRepository walk { get; private set; }
+        private readonly ILogger<RegionRepository> log;
 
         private readonly ConcurrentDictionary<Type, object> dic;
 
-        public UnitOfWork(ApplicationDBContext context) 
+        public UnitOfWork(ApplicationDBContext context,ILogger<RegionRepository>log) 
         {
             _context = context;
-            region = new RegionRepository(_context);
+            this.log=log;
+            region = new RegionRepository(_context,log);
             walk = new WalkRepository(_context);
             dic = new();
         }

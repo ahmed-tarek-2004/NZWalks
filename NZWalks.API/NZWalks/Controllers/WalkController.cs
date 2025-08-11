@@ -21,7 +21,7 @@ namespace NZWalks.Controllers
             this.services = services;
         }
 
-        [Authorize(Roles ="Reader,Writer")]
+        //[Authorize(Roles ="Reader,Writer")]
         [HttpGet("GetAll")]
         public async Task<IActionResult> GetAll([FromQuery] string? Properity, [FromQuery]string? order, [FromQuery]bool?isDescending=false,
             [FromQuery]int PageNum =1 ,[FromQuery] int PageSize=1000)

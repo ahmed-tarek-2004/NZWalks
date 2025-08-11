@@ -20,7 +20,7 @@ namespace NZWalks.MiddleWare
             await Next.Invoke(context);
             time.Stop();
             logger.LogDebug($"Path From : {context.Request.Path}");
-            logger.LogInformation($"Time Taken For Reques : {time.ElapsedMilliseconds}");
+            logger.LogInformation($"Time Taken For Request : {time.ElapsedMilliseconds}");
         }
     }
 }

@@ -1,6 +1,9 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -13,8 +16,11 @@ using NZWalk.DataAccess.Repository;
 using NZWalk.Services.IServices;
 using NZWalk.Services.Mapping;
 using NZWalk.Services.Services;
+using NZWalks.API.Configurations;
+//using NZWalks.Configuration;
 using NZWalks.MiddleWare;
 using NZWalks.Validation;
+using Serilog;
 using System.Text;
 
 namespace NZWalks
@@ -24,6 +30,13 @@ namespace NZWalks
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            #region SeriLog
+            var logger = new LoggerConfiguration()
+                 .ReadFrom.Configuration(builder.Configuration)
+                .CreateLogger();
+            builder.Logging.ClearProviders();
+            builder.Services.AddSerilog(logger);
+            #endregion
 
             // Add services to the container.
             builder.Services.AddControllers().ConfigureApiBehaviorOptions(option =>
@@ -32,12 +45,26 @@ namespace NZWalks
             });
             builder.Services.AddHttpContextAccessor();
 
+            #region APIVersioning
+            builder.Services.AddApiVersioning(options =>
+            {
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.DefaultApiVersion = new ApiVersion(1, 0);
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = new UrlSegmentApiVersionReader();
+            });
+            builder.Services.AddVersionedApiExplorer(options =>
+            {
+                options.GroupNameFormat = "'v'VVV";
+                options.SubstituteApiVersionInUrl = true;
+            });
+            #endregion
             // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             #region Dbcontext Adding
             builder.Services.AddDbContext<ApplicationDBContext>(option =>
             {
                 option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-            }) ;
+            });
             builder.Services.AddDbContext<AuthorizationDBContext>(option =>
             {
                 option.UseSqlServer(builder.Configuration.GetConnectionString("AuthConnection"));
@@ -53,8 +80,9 @@ namespace NZWalks
             builder.Services.AddScoped<ITokenServices, TokenServices>();
             builder.Services.AddScoped<IImageServices, ImageServices>();
             builder.Services.AddScoped<ValidationFilter>();
+            builder.Services.AddScoped<ImageValidation>();
             builder.Services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
-            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options=>
+            builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
             {
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
@@ -71,8 +99,8 @@ namespace NZWalks
             builder.Services.AddAuthentication(option =>
             {
                 option.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                option.DefaultScheme= JwtBearerDefaults.AuthenticationScheme;
-                option.DefaultChallengeScheme= JwtBearerDefaults.AuthenticationScheme;
+                option.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                option.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
                 options.SaveToken = true;
@@ -103,15 +131,15 @@ namespace NZWalks
             builder.Services.AddSwaggerGen();
             #endregion
 
-            #region Swagger Setting
+            #region Swagger Settings At Web
             builder.Services.AddSwaggerGen(swagger =>
             {
                 //This is to generate the Default UI of Swagger Documentation    
-                swagger.SwaggerDoc("v1", new OpenApiInfo
+                swagger.SwaggerDoc("v2", new OpenApiInfo
                 {
-                    Version = "v1",
-                    Title = "ASP.NET 8 Web API",
-                    Description = " ITI Projrcy"
+                    Version = "v2",
+                    Title = "ASP.NET 9 Web API",
+                    Description = "NZWalk Project"
                 });
                 // To Enable authorization using Swagger (JWT)    
                 swagger.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
@@ -140,14 +168,24 @@ namespace NZWalks
             });
             #endregion
 
+            builder.Services.ConfigureOptions<SwaggerOptionsConfiguration>();
             var app = builder.Build();
+            var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
                 app.MapOpenApi();
                 app.UseSwagger();
-                app.UseSwaggerUI();
+                app.UseSwaggerUI(options =>
+                {
+                    foreach (var description in provider.ApiVersionDescriptions)
+                    {
+                        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+                            $"My API {description.GroupName.ToUpperInvariant()}");
+                    }
+                }
+                );
             }
 
             app.UseHttpsRedirection();
@@ -158,8 +196,10 @@ namespace NZWalks
                 FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "Images")),
                 RequestPath = "/Images"
             });
-           app.UseMiddleware<TimeEstimate>();
-           
+            app.UseMiddleware<TimeEstimate>();
+            app.UseMiddleware<GlobalExceptionMiddleWare>();
+            //app.UseExceptionHandler();
+
             app.MapControllers();
 
             app.Run();

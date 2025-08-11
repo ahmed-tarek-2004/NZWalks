@@ -33,8 +33,8 @@ namespace NZWalk.Services.Services
             var UserRoles = (List<string>)await userManager.GetRolesAsync(user);
             return new UserDTO()
             {
-                roles =UserRoles,
-                user=user
+                roles = UserRoles,
+                user = user
             };
 
         }
@@ -47,6 +47,7 @@ namespace NZWalk.Services.Services
                 UserName=registerDTO.Email.Substring(0,registerDTO.Email.IndexOf("@")),
                 //PasswordHash = registerDTO.Password
             };
+            await userManager.ConfirmEmailAsync(user, "Ahmed@gmail.com");
             var result= await userManager.CreateAsync(user,registerDTO.Password);
             if (registerDTO.Roles == null||!registerDTO.Roles.Any()||!result.Succeeded)
             {

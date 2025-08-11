@@ -14,19 +14,21 @@ namespace NZWalks.Controllers
     {
         private readonly IImageServices imageServices;
         private readonly IWebHostEnvironment webHostEnvironment;
-      //  private readonly IHttpContextAccessor httpContextAccessor;
+        private readonly ILogger<ImageController> logger;
         //private readonly IMapper map;
         public ImageController(IImageServices imageServices,
-            IWebHostEnvironment webHostEnvironment)
+            IWebHostEnvironment webHostEnvironment,
+            ILogger<ImageController> logger)
         {
             this.imageServices = imageServices;
             //this.map = map;
             this.webHostEnvironment = webHostEnvironment;
-           // this.httpContextAccessor = httpContextAccessor;
+            this.logger = logger;
+            // this.httpContextAccessor = httpContextAccessor;
         }
 
         [HttpPost("Upload")]
-        [ImageValidation]
+        [ServiceFilter(typeof(ImageValidation))]
         public async Task<IActionResult> Upload([FromForm] ImageFileDTO request)
         {
             var FullPath= $"{Request.Scheme}://{Request.Host}" +
@@ -34,7 +36,7 @@ namespace NZWalks.Controllers
            
             var image= await imageServices.Upload(request,webHostEnvironment.ContentRootPath,
                 FullPath);
-
+            logger.LogDebug("Works Successful");
             return Ok(image);
         }
     }

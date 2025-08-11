@@ -49,7 +49,6 @@ namespace NZWalk.Services.Services
             await unitOfWork.walk.Remove(Walk);
             await unitOfWork.SaveChanges();
             return returned;
-
         }
         public async Task<WalkDto> Get(Guid id)
         {
@@ -58,14 +57,19 @@ namespace NZWalk.Services.Services
             var WalkDto = map.Map<WalkDto>(Walk);
             return WalkDto;
         }
+
         public async Task<IEnumerable<WalkDto>> GetALL(string? Properity = null, string? order = null, bool? IsDescending = false, int PageNum = 1, int PageSize = 1000)
         {
-            var Walks = await unitOfWork.walk.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterWalkByName(),
+            //throw new NotImplementedException();
+            var query = await unitOfWork.walk.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterWalkByName(),
                 IncludeProperities: "Region,Difficulty", order, IsDescending);
+            
+            var Walks=await query.ToListAsync();
             var PageResult = (PageNum - 1) * (PageSize);
             Walks = Walks.Skip(PageResult).Take(PageSize).ToList();
             return map.Map<IEnumerable<WalkDto>>(Walks);
         }
+
         public async Task<Walk> Update(Guid id, UpdateWalkDto WalkDto)
         {
             var Walk = await unitOfWork.walk.Get(r => r.Id == id, IncludeProperities: "Region,Difficulty");

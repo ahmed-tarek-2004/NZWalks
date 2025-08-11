@@ -11,6 +11,6 @@ namespace NZWalk.DataAccess.IRepository
 {
     public interface IWalkRepository:IRepository<Walk>
     {
-      
+        public Task<IQueryable<Walk>> GetAll(Expression<Func<Walk, bool>> ?filter=null,string?IncludeProperities=null, string? order = null, bool? IsDescending = false);
     }
 }

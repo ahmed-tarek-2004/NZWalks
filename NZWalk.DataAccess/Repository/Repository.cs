@@ -43,7 +43,7 @@ namespace NZWalk.DataAccess.Repository
 
         }
 
-        public async Task<IEnumerable<T>> GetAll(Expression<Func<T, bool>>? filter = null,string ?IncludeProperities=null, string? order = null, bool? IsDescending = false)
+        public async Task<IQueryable<T>> GetAll(Expression<Func<T, bool>>? filter = null,string ?IncludeProperities=null)
         {
             IQueryable<T> query = db;
 
@@ -56,14 +56,7 @@ namespace NZWalk.DataAccess.Repository
                     query = query.Include(include);
                 }
             }
-            var allowedSortFields = new List<String>() { "Name", "LengthInKm", "RegionId", "DifficultyId" };
-            if (!string.IsNullOrEmpty(order) && allowedSortFields.Contains(order, StringComparer.OrdinalIgnoreCase))
-            {
-                var orderProperty = allowedSortFields.FirstOrDefault(b=>b.ToLower()==order.ToLower());
-                query = IsDescending == true ? query.OrderByDescending(x => EF.Property<T>(x, orderProperty))
-                    : query.OrderBy(x => EF.Property<T>(x, orderProperty));
-            }
-            return await query.ToListAsync();
+            return  query;
         }
 
 

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using NZWalk.DataAccess.IRepository;
 using NZWalk.DataAccess.Model.Domin;
 using NZWalk.DataAccess.Model.DTOs;
@@ -50,11 +51,13 @@ namespace NZWalk.Services.Services
             var regionDto = map.Map<RegionDTO>(region);
             return regionDto;
         }
-        public async Task<IEnumerable<RegionDTO>> GetALL(string? Properity = null)
+        public async Task<IEnumerable<RegionDTO>> GetALL(string? Properity = null, string? order = null, bool? IsDescending = false)
         {
-            var regions = await unitOfWork.region.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterByRegionName());
-
-            return map.Map<IEnumerable<RegionDTO>>(regions);
+            var regions = await unitOfWork.region.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterByRegionName(),order,IsDescending);
+            
+            var regionsDto = await regions.ToListAsync();
+          
+            return map.Map<IEnumerable<RegionDTO>>(regionsDto);
         }
         public async Task<Region> Update(Guid id, UpdateRegionRequestDto regionDto)
         {

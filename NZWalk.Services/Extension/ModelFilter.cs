@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace NZWalk.Services.Extension
 {
-   
+
     public static class ModelFilter
     {
 
@@ -25,13 +25,18 @@ namespace NZWalk.Services.Extension
         public static Expression<Func<Walk, bool>> FilterWalkByDesc(this string name)
         {
             Expression<Func<Walk, bool>>? filter = query => query.Name.Contains(name);
+
             return filter;
         }
+
+        //Can MAke Sort by it instead of making Ef.property();
+        /*
         public static IQueryable<Walk> Sorting(this IQueryable<Walk> walks)
         {
 
             return walks;
         }
+         */
 
     }
 }
