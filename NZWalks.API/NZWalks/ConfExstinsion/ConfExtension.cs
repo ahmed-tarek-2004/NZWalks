@@ -8,6 +8,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NZWalk.DataAccess.Data;
+using NZWalk.DataAccess.DBInitializer;
 using NZWalk.DataAccess.IRepository;
 using NZWalk.DataAccess.Repository;
 using NZWalk.Services.IServices;
@@ -80,6 +81,7 @@ namespace NZWalk.utility.ConfExstinsion
             services.AddScoped<ITokenServices, TokenServices>();
             services.AddScoped<IImageServices, ImageServices>();
             services.AddScoped<ICacheServices, CacheServices>();
+            services.AddScoped<IDbInitializer,DbInitializer>();
             services.AddScoped<ValidationFilter>();
             services.AddScoped<ImageValidation>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);

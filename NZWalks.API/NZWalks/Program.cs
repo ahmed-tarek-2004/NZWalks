@@ -10,6 +10,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NZWalk.DataAccess.Data;
+using NZWalk.DataAccess.DBInitializer;
 using NZWalk.DataAccess.IRepository;
 using NZWalk.DataAccess.Repository;
 using NZWalk.Services.IServices;
@@ -112,10 +113,17 @@ namespace NZWalks
             });
             app.UseMiddleware<TimeEstimate>();
             app.UseMiddleware<GlobalExceptionMiddleWare>();
-            //app.UseExceptionHandler();
+            SeedDatabase().GetAwaiter().GetResult();
             app.UseHealthChecks("/health", new HealthCheckOptions());
             app.MapControllers();
-
+            async Task SeedDatabase()
+            {
+                using (var scope = app.Services.CreateScope())
+                {
+                    var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+                    await dbInitializer.Initialize();
+                }
+            }
             app.Run();
         }
     }
