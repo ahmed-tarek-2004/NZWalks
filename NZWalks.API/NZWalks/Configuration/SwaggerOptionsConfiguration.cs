@@ -1,43 +1,28 @@
-﻿//using Microsoft.AspNetCore.Mvc.ApiExplorer;
-//using Microsoft.Extensions.Options;
-//using Microsoft.OpenApi.Models;
-//using Swashbuckle.AspNetCore.SwaggerGen;
+﻿using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.Extensions.Options;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Microsoft.OpenApi.Models;
 
-//namespace NZWalks.API.Configurations
-//{
-//    public class SwaggerOptionsConfiguration : IConfigureNamedOptions<SwaggerGenOptions>
-//    {
-//        private readonly IApiVersionDescriptionProvider _apiVersionDescriptionProvider;
+public class SwaggerOptionsConfiguration : IConfigureNamedOptions<SwaggerGenOptions>
+{
+    private readonly IApiVersionDescriptionProvider provider;
 
-       
-//        public void Configure(string? name, SwaggerGenOptions options)
-//        {
-//            Configure(options);
-//        }
+    public SwaggerOptionsConfiguration(IApiVersionDescriptionProvider provider)
+    {
+        this.provider = provider;
+    }
 
-//        public void Configure(SwaggerGenOptions options)
-//        {
-//            foreach (var description in _apiVersionDescriptionProvider.ApiVersionDescriptions)
-//            {
-//                options.SwaggerDoc(description.GroupName, CreateVersionInfo(description));
-//            }
-//        }
+    public void Configure(string name, SwaggerGenOptions options) => Configure(options);
 
-//        private OpenApiInfo CreateVersionInfo(ApiVersionDescription description)
-//        {
-//            var info = new OpenApiInfo
-//            {
-//                Title = $"NZWalks API v{description.ApiVersion}",
-//                Version = description.ApiVersion.ToString(),
-//                Description = "API documentation for versioned endpoints"
-//            };
-
-//            if (description.IsDeprecated)
-//            {
-//                info.Description += " (This version is deprecated)";
-//            }
-
-//            return info;
-//        }
-//    }
-//}
+    public void Configure(SwaggerGenOptions options)
+    {
+        foreach (var description in provider.ApiVersionDescriptions)
+        {
+            options.SwaggerDoc(description.GroupName, new OpenApiInfo
+            {
+                Title = $"NZWalks API {description.ApiVersion}",
+                Version = description.ApiVersion.ToString()
+            });
+        }
+    }
+}
