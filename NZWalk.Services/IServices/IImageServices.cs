@@ -10,6 +10,6 @@ namespace NZWalk.Services.IServices
 {
     public interface IImageServices
     {
-        public Task<ImageFile> Upload(ImageFileDTO file,string web,string path);
+        public Task<ImageFile> Upload(ImageFileDTO file,string web,string path, CancellationToken cancellationToken = default);
     }
 }

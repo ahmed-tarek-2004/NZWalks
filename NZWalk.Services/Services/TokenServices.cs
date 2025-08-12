@@ -22,7 +22,7 @@ namespace NZWalk.Services.Services
         }
 
 
-        public async Task<JwtSecurityToken> CreateJWT(IdentityUser user,List<string> roles)
+        public async Task<JwtSecurityToken> CreateJWT(IdentityUser user,List<string> roles, CancellationToken cancellationToken = default)
         {
             var claims = new List<Claim>()
             {

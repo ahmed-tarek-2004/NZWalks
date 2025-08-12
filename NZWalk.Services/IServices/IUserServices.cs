@@ -12,8 +12,8 @@ namespace NZWalk.Services.IServices
     public interface IUserServices
     {
 
-        public Task<IdentityResult> Register(RegisterDTO registerDTO);
-        public Task<UserDTO> Login(LoginDTO loginDTO);
+        public Task<IdentityResult> Register(RegisterDTO registerDTO, CancellationToken cancellationToken = default);
+        public Task<UserDTO> Login(LoginDTO loginDTO, CancellationToken cancellationToken = default);
       
     }
 }

@@ -21,13 +21,15 @@ namespace NZWalk.Services.Services
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper map;
-        public WalkServices(IUnitOfWork unitOfWork, IMapper map)
+        private readonly ICacheServices cacheServices;
+        public WalkServices(IUnitOfWork unitOfWork, IMapper map,ICacheServices cacheServices)
         {
             this.unitOfWork = unitOfWork;
             this.map = map;
+            this.cacheServices = cacheServices;
 
         }
-        public async Task<Walk> Add(AddWalkDto WalkDto)
+        public async Task<Walk> Add(AddWalkDto WalkDto,bool ApplyCache=false, CancellationToken cancellationToken = default)
         {
             if (WalkDto == null)
             {
@@ -36,9 +38,67 @@ namespace NZWalk.Services.Services
             var Walk = map.Map<Walk>(WalkDto);
             await unitOfWork.walk.Add(Walk);
             await unitOfWork.SaveChanges();
+            if(ApplyCache)
+            await cacheServices.SetCache<Walk>($"Walk-{Walk.Id}", Walk);
             return Walk;
         }
-        public async Task<Walk> Delete(Guid id)
+        public async Task<WalkDto> Get(Guid id, bool ApplyCache = false, CancellationToken cancellationToken = default)
+        {
+            var resultFromCache = await cacheServices.GetCache<Walk>($"Walk-{id}");
+            var Walk = ApplyCache && resultFromCache != null
+                ? resultFromCache
+                : await unitOfWork.walk.Get(p => p.Id == id);
+           
+            if (Walk is null) return null;
+            var WalkDto = map.Map<WalkDto>(Walk);
+            return WalkDto;
+        }
+
+        public async Task<IEnumerable<WalkDto>> GetALL(string? Properity = null, string? order = null, bool? IsDescending = false
+            , int PageNum = 1, int PageSize = 1000, bool ApplyCache = false, CancellationToken cancellationToken = default)
+        {
+           
+            IEnumerable<Walk> query ;
+            if(ApplyCache)
+            {
+                query = await cacheServices.GetCache<IEnumerable<Walk>>("Walks");
+                if(query==null)
+                {
+                    query =  await unitOfWork.walk.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterWalkByName(),
+                    IncludeProperities: "Region,Difficulty", order, IsDescending);
+                    await cacheServices.SetCache("Walks", query.ToList());
+                }
+            }
+            else
+            {
+                query =  await unitOfWork.walk.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterWalkByName(),
+                IncludeProperities: "Region,Difficulty", order, IsDescending);
+            }
+            
+
+            var PageResult = (PageNum - 1) * (PageSize);
+            var Walks = query.ToList().Skip(PageResult).Take(PageSize);
+            return map.Map<IEnumerable<WalkDto>>(Walks);
+        }
+
+        public async Task<Walk> Update(Guid id, UpdateWalkDto WalkDto
+            , bool ApplyCache = false, CancellationToken cancellationToken = default)
+        {
+            var Walk = await unitOfWork.walk.Get(r => r.Id == id, IncludeProperities: "Region,Difficulty");
+            if (Walk != null)
+            {
+                map.Map(WalkDto, Walk);
+                await unitOfWork.SaveChanges();
+                if (ApplyCache)
+                {
+                    await cacheServices.SetCache<Walk>($"Walk-{id}", Walk);
+                    await cacheServices.Remove<IEnumerable<Walk>>("Walks");
+                }
+                return Walk;
+            }
+            return null;
+        }
+        public async Task<Walk> Delete(Guid id, bool ApplyCache = false, CancellationToken cancellationToken = default)
         {
             var Walk = await unitOfWork.walk.Get(p => p.Id == id);
             if (Walk == null)
@@ -48,38 +108,12 @@ namespace NZWalk.Services.Services
             var returned = Walk;
             await unitOfWork.walk.Remove(Walk);
             await unitOfWork.SaveChanges();
-            return returned;
-        }
-        public async Task<WalkDto> Get(Guid id)
-        {
-            var Walk = await unitOfWork.walk.Get(p => p.Id == id);
-            if (Walk is null) return null;
-            var WalkDto = map.Map<WalkDto>(Walk);
-            return WalkDto;
-        }
-
-        public async Task<IEnumerable<WalkDto>> GetALL(string? Properity = null, string? order = null, bool? IsDescending = false, int PageNum = 1, int PageSize = 1000)
-        {
-            //throw new NotImplementedException();
-            var query = await unitOfWork.walk.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterWalkByName(),
-                IncludeProperities: "Region,Difficulty", order, IsDescending);
-            
-            var Walks=await query.ToListAsync();
-            var PageResult = (PageNum - 1) * (PageSize);
-            Walks = Walks.Skip(PageResult).Take(PageSize).ToList();
-            return map.Map<IEnumerable<WalkDto>>(Walks);
-        }
-
-        public async Task<Walk> Update(Guid id, UpdateWalkDto WalkDto)
-        {
-            var Walk = await unitOfWork.walk.Get(r => r.Id == id, IncludeProperities: "Region,Difficulty");
-            if (Walk != null)
+            if (ApplyCache)
             {
-                map.Map(WalkDto, Walk);
-                await unitOfWork.SaveChanges();
-                return Walk;
+                await cacheServices.Remove<IEnumerable<Walk>>("Walks");
+                await cacheServices.Remove<Walk>($"Walk-{id}");
             }
-            return null;
+            return returned;
         }
     }
 }

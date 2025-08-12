@@ -15,13 +15,14 @@ namespace NZWalk.Services.Services
     {
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper map;
-        public RegionServices(IUnitOfWork unitOfWork, IMapper map)
+        private readonly ICacheServices cacheServices;
+        public RegionServices(IUnitOfWork unitOfWork, IMapper map,ICacheServices cacheServices)
         {
             this.unitOfWork = unitOfWork;
             this.map = map;
-          
+            this.cacheServices = cacheServices;
         }
-        public async Task<Region> Add(AddRegionRequestDto regionDto)
+        public async Task<Region> Add(AddRegionRequestDto regionDto,bool ApplyCache=false,CancellationToken cancellationToken = default)
         {
             if (regionDto == null)
             {
@@ -30,9 +31,66 @@ namespace NZWalk.Services.Services
             var region = map.Map<Region>(regionDto);
             await unitOfWork.region.Add(region);
             await unitOfWork.SaveChanges();
+            if(ApplyCache)
+            await cacheServices.SetCache<Region>($"Region-{region.Id}",region);
             return region;
         }
-        public async Task<Region> Delete(Guid id)
+        
+        public async Task<RegionDTO> Get(Guid id, bool ApplyCache=false,CancellationToken cancellationToken = default)
+        {
+            var resultFromCache = await cacheServices.GetCache<Region>($"Region-{id}");
+            var region = ApplyCache&& resultFromCache!= null
+                ? resultFromCache
+                : await unitOfWork.region.Get(p => p.Id == id);
+            if (region is null) return null;
+            var regionDto = map.Map<RegionDTO>(region);
+            return regionDto;
+        }
+        public async Task<IEnumerable<RegionDTO>> GetALL(string? Properity = null, string? order = null
+            , bool? IsDescending = false, bool ApplyingCache = false, CancellationToken cancellationToken = default)
+        {
+            IEnumerable<Region> regions ;
+            if(ApplyingCache)
+            {
+                var RegionCached = await cacheServices.GetCache<IEnumerable<Region>>("Regions");
+                if(RegionCached!=null)
+                {
+                    regions = RegionCached;
+                }
+                else
+                {
+                    regions = await unitOfWork.region.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterByRegionName(), order, IsDescending);
+                    await cacheServices.SetCache("Regions", regions.ToList());
+                }
+            }
+            else
+            {
+                regions = await unitOfWork.region.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterByRegionName(), order, IsDescending);
+            }
+            var regionsDto = regions.ToList();
+          
+            return map.Map<List<RegionDTO>>(regionsDto);
+        }
+        public async Task<Region> Update(Guid id, UpdateRegionRequestDto regionDto
+            ,bool ApplyCahce=false, CancellationToken cancellationToken = default)
+        {
+            
+            var region = await unitOfWork.region.Get(r => r.Id == id);
+           
+            if (region != null)
+            {
+                region = map.Map(regionDto,region);
+                await unitOfWork.SaveChanges();
+                if (ApplyCahce)
+                {
+                    await cacheServices.SetCache<Region>($"Region-{id}", region);
+                    await cacheServices.Remove<IEnumerable<Region>>("Regions");
+                }
+                return region;
+            }
+            return null;
+        }
+        public async Task<Region> Delete(Guid id, bool ApplyCache = false, CancellationToken cancellationToken = default)
         {
             var region = await unitOfWork.region.Get(p => p.Id == id);
             if (region == null)
@@ -41,34 +99,14 @@ namespace NZWalk.Services.Services
             }
             var returned = region;
             await unitOfWork.region.Remove(region);
-            return returned;
-             
-        }
-        public async Task<RegionDTO> Get(Guid id)
-        {
-            var region = await unitOfWork.region.Get(p => p.Id == id);
-            if (region is null) return null;
-            var regionDto = map.Map<RegionDTO>(region);
-            return regionDto;
-        }
-        public async Task<IEnumerable<RegionDTO>> GetALL(string? Properity = null, string? order = null, bool? IsDescending = false)
-        {
-            var regions = await unitOfWork.region.GetAll(string.IsNullOrEmpty(Properity) == true ? null : Properity.FilterByRegionName(),order,IsDescending);
-            
-            var regionsDto = await regions.ToListAsync();
-          
-            return map.Map<IEnumerable<RegionDTO>>(regionsDto);
-        }
-        public async Task<Region> Update(Guid id, UpdateRegionRequestDto regionDto)
-        {
-            var region = await unitOfWork.region.Get(r => r.Id == id);
-            if (region != null)
+            await unitOfWork.SaveChanges();
+            if (ApplyCache)
             {
-                region = map.Map<Region>(regionDto);
-                await unitOfWork.SaveChanges();
-                return region;
+                await cacheServices.Remove<IEnumerable<Region>>("Regions");
+                await cacheServices.Remove<Region>($"Region-{id}");
             }
-            return null;
+            return returned;
+
         }
     }
 }

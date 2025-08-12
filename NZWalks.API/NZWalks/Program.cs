@@ -1,6 +1,7 @@
 using Asp.Versioning.ApiExplorer;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,7 +33,7 @@ namespace NZWalks
 
 
             #region SeriLog
-            builder.Logging.LoggingConfiguration(builder.Services,builder.Configuration);
+            builder.Services.LoggingConfiguration(builder.Logging,builder.Configuration);
             #endregion
 
             // Add services to the container.
@@ -53,6 +54,14 @@ namespace NZWalks
             builder.Services.AddingDependencyInjection();
             #endregion
 
+            #region Adding Redis
+            builder.Services.CacheConfiguration(builder.Configuration);
+            #endregion
+
+            #region HealthCheck
+            builder.Services.HealthCheck(builder.Configuration);
+            #endregion
+
             #region JWT Config
             builder.Services.Configure<JWTToken>(builder.Configuration.GetSection("JWT"));
             builder.Services.JWTConfiguration(builder.Configuration);
@@ -71,6 +80,7 @@ namespace NZWalks
             #region APIVersioning
             builder.Services.AddingAPIVersionging();
             #endregion
+            
             builder.Services.ConfigureOptions<SwaggerOptionsConfiguration>();
             var app = builder.Build();
             var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
@@ -103,7 +113,7 @@ namespace NZWalks
             app.UseMiddleware<TimeEstimate>();
             app.UseMiddleware<GlobalExceptionMiddleWare>();
             //app.UseExceptionHandler();
-
+            app.UseHealthChecks("/health", new HealthCheckOptions());
             app.MapControllers();
 
             app.Run();

@@ -18,7 +18,7 @@ namespace NZWalk.Services.Services
             this.userManager= userManager;
         }
 
-        public async Task<UserDTO> Login(LoginDTO loginDTO)
+        public async Task<UserDTO> Login(LoginDTO loginDTO, CancellationToken cancellationToken = default)
         {
             var user = await userManager.FindByEmailAsync(loginDTO.Email);
             if (user == null)
@@ -39,7 +39,7 @@ namespace NZWalk.Services.Services
 
         }
 
-        public async Task<IdentityResult> Register(RegisterDTO registerDTO)
+        public async Task<IdentityResult> Register(RegisterDTO registerDTO, CancellationToken cancellationToken = default)
         {
             var user = new IdentityUser()
             {

@@ -28,7 +28,7 @@ namespace NZWalk.Services.Services
         }
 
 
-        public async Task<ImageFile> Upload(ImageFileDTO request,string web,string path)
+        public async Task<ImageFile> Upload(ImageFileDTO request,string web,string path, CancellationToken cancellationToken = default)
         {
             var Image = mapper.Map<ImageFile>(request);
             var localFile = Path.Combine(web, "Images", $"{Image.FileName}{ Image.FileExtension}");

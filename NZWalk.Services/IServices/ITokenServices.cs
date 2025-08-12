@@ -10,6 +10,6 @@ namespace NZWalk.DataAccess.IRepository
 {
     public interface ITokenServices
     {
-        public Task<JwtSecurityToken> CreateJWT(IdentityUser user, List<string> roles);
+        public Task<JwtSecurityToken> CreateJWT(IdentityUser user, List<string> roles, CancellationToken cancellationToken = default);
     }
 }

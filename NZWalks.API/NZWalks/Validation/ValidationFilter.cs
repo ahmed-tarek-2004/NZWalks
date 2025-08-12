@@ -11,10 +11,6 @@ namespace NZWalks.Validation
         {
             this.logger = logger;
         }
-        public void OnActionExecuted(ActionExecutedContext context)
-        {
-        }
-
         public void OnActionExecuting(ActionExecutingContext context)
         {
             foreach(var args in context.ActionArguments)
@@ -22,12 +18,15 @@ namespace NZWalks.Validation
                 logger.LogInformation($"Key Passed: {args.Key},Value Passed : {args.Value}");
             }
 
-
             if(!context.ModelState.IsValid)
             {
                 context.Result = new BadRequestResult();
             }
             
         }
+        public void OnActionExecuted(ActionExecutedContext context)
+        {
+        }
+
     }
 }
