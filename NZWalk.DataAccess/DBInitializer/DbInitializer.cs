@@ -31,7 +31,7 @@ namespace NZWalk.DataAccess.DBInitializer
             //migrations if they are not applied
             try
             {
-                if (context.Database.GetPendingMigrations().Count() > 0)
+                if(context.Database.GetPendingMigrations().Count()>0)
                 {
                     context.Database.Migrate();
                 }
@@ -39,23 +39,23 @@ namespace NZWalk.DataAccess.DBInitializer
             catch (Exception ex) { }
 
             //create roles if they are not created
-            if (!await _roleManager.RoleExistsAsync( SD.readerRoleId))
+            if (!await _roleManager.RoleExistsAsync(SD.readerRoleId))
             {
-               await _roleManager.CreateAsync(new IdentityRole(SD.writerRoleId));
-               await _roleManager.CreateAsync(new IdentityRole(SD.readerRoleId));
-               
+                await _roleManager.CreateAsync(new IdentityRole(SD.writerRoleId));
+                await _roleManager.CreateAsync(new IdentityRole(SD.readerRoleId));
+
                 IdentityUser user = new IdentityUser
                 {
                     UserName = "admin@gmail.com",
                     Email = "admin@gmail.com",
                     EmailConfirmed = true,
-                    PhoneNumber="112233445566"
+                    PhoneNumber = "112233445566"
                 };
                 await _userManager.CreateAsync(user, "Admin123*");
                 await _userManager.AddToRoleAsync(user, SD.writerRoleId);
             }
 
-            return ;
+            return;
         }
     }
 }
