@@ -1,155 +1,96 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using NZWalk.UI.Models.DTO;
-using System.Text;
-using System.Text.Json;
+using System.Net.Http.Json;
+using NZWalk.UI.Models; // RegionDTO
 
-namespace NZWalk.UI.Controllers
+public class RegionController : Controller
 {
-    public class RegionController : Controller
+    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly string _baseUrl = "https://localhost:7136/api/v2/Regions";
+
+    public RegionController(IHttpClientFactory httpClientFactory)
     {
-        private readonly IHttpClientFactory _httpClientFactory;
+        _httpClientFactory = httpClientFactory;
+    }
 
-        public RegionController(IHttpClientFactory httpClientFactory)
-        {
-            _httpClientFactory = httpClientFactory;
-        }
+    // GET: List all regions
+    [HttpGet]
+    public async Task<IActionResult> Index()
+    {
+        var client = _httpClientFactory.CreateClient();
+        var regions = await client.GetFromJsonAsync<List<RegionDTO>>($"{_baseUrl}/GetAll");
+        return View(regions);
+    }
 
-        [HttpGet]
-        public async Task<IActionResult> Index()
-        {
-            var response = new List<RegionDTO>();
+    // GET: Create form
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View();
+    }
 
-            try
-            {
-                var client = _httpClientFactory.CreateClient();
+    // POST: Create region
+    [HttpPost]
+    public async Task<IActionResult> Create(RegionDTO region)
+    {
+        if (!ModelState.IsValid)
+            return View(region);
 
-                var httpResponseMessage = await client.GetAsync("https://localhost:7136/api/Regions/GetAll");
+        var client = _httpClientFactory.CreateClient();
+        var response = await client.PostAsJsonAsync($"{_baseUrl}/Create", region);
 
-                httpResponseMessage.EnsureSuccessStatusCode();
+        if (response.IsSuccessStatusCode)
+            return RedirectToAction(nameof(Index));
 
-                //var msg = JsonSerializer.Deserialize<RegionDTO>();
+        ModelState.AddModelError("", "Error creating region");
+        return View(region);
+    }
 
-                response.AddRange(await httpResponseMessage.Content.ReadFromJsonAsync<IEnumerable<RegionDTO>>());
-            }
-            catch (Exception ex)
-            {
-
-                // Log exceptions
-            }
-            return View(response);
-        }
+    // GET: Edit form
+    [HttpGet]
+    public async Task<IActionResult> Edit(Guid id)
+    {
+        var client = _httpClientFactory.CreateClient();
+        var region = await client.GetFromJsonAsync<RegionDTO>($"{_baseUrl}/GetById/{id}");
        
-        [HttpGet]
-        public IActionResult Add()
-        {
-            return View();
-        }
+        return View(region);
+    }
 
-        [HttpPost]
-        public async Task<IActionResult> Add(AddRegionVM regionDTO)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest("Something went wrong while adding new region");
+    // POST: Update region
+    [HttpPost]
+    public async Task<IActionResult> Edit(RegionDTO region)
+    {
+        if (!ModelState.IsValid)
+            return View(region);
 
-                var client = _httpClientFactory.CreateClient();
+        var client = _httpClientFactory.CreateClient();
+        var response = await client.PutAsJsonAsync($"{_baseUrl}/Update/{region.Id}", region);
 
-                var httpRequestMessage = new HttpRequestMessage
-                {
-                    Method = HttpMethod.Post,
-                    RequestUri = new Uri("https://localhost:7136/api/Regions/Create"),
-                    Content = new StringContent(JsonSerializer.Serialize(regionDTO), Encoding.UTF8, "application/json")
-                };
+        if (response.IsSuccessStatusCode)
+            return RedirectToAction(nameof(Index));
 
-                var httpResponseMessage = await client.SendAsync(httpRequestMessage);
+        ModelState.AddModelError("", "Error updating region");
+        return View(region);
+    }
 
-                httpResponseMessage.EnsureSuccessStatusCode();
-
-                var response = await httpResponseMessage.Content.ReadFromJsonAsync<RegionDTO>();
-
-                if (response is null)
-                    return View(Index);
-            }
-            catch (Exception ex)
-            {
-
-                // Log exception
-            }
-
-            return RedirectToAction("Index");
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Edit(Guid id)
+    [HttpGet]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        try
         {
             var client = _httpClientFactory.CreateClient();
 
-            var response = await client.GetFromJsonAsync<RegionDTO>($"https://localhost:7136/api/Regions/GetById/{id.ToString()}");
+            var response = await client.DeleteFromJsonAsync<RegionDTO>($"{_baseUrl}/Delete/{id}");
 
-            return View(response);
+            if (response is null)
+                return View(response);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> Edit(RegionDTO regionDTO)
+        catch (Exception)
         {
-            if (regionDTO is null)
-                return BadRequest("Region data is null.");
 
-            if (!ModelState.IsValid)
-                return View(regionDTO);
-
-            try
-            {
-                var client = _httpClientFactory.CreateClient();
-
-                var httpRequestMessage = new HttpRequestMessage
-                {
-                    Method = HttpMethod.Put,
-                    RequestUri = new Uri($"https://localhost:7136/api/Regions/Update/{regionDTO.Id}"),
-                    Content = new StringContent(JsonSerializer.Serialize(regionDTO), Encoding.UTF8, "application/json")
-                };
-
-                var httpResponseMessage = await client.SendAsync(httpRequestMessage);
-
-                httpResponseMessage.EnsureSuccessStatusCode();
-
-                var response = await httpResponseMessage.Content.ReadFromJsonAsync<RegionDTO>();
-
-                if (response is null)
-                    return View(response);
-            }
-            catch (Exception ex)
-            {
-
-                return View(regionDTO);
-            }
-
-            return RedirectToAction("Index");
+            // Log exception
         }
 
-        [HttpGet]
-        public async Task<IActionResult> Delete(Guid id)
-        {
-            try
-            {
-                var client = _httpClientFactory.CreateClient();
-
-                var response = await client.DeleteAsync($"https://localhost:7136/api/Regions/Delete/{id.ToString()}");
-               // var httpResponseMessage = await client.DeleteAsync($"https://localhost:7081/api/regions/{request.Id}");
-
-                response.EnsureSuccessStatusCode();
-
-            }
-            catch (Exception ex)
-            {
-                // Log exception
-                Console.WriteLine($"Exception during delete: {ex.Message}");
-                return View("Error");
-            }
-
-            return RedirectToAction("Index");
-        }
-
+        return RedirectToAction("Index");
     }
 }

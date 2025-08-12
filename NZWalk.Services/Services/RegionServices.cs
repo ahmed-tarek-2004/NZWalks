@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NZWalk.DataAccess.IRepository;
 using NZWalk.DataAccess.Model.Domin;
 using NZWalk.DataAccess.Model.DTOs;
@@ -16,11 +17,14 @@ namespace NZWalk.Services.Services
         private readonly IUnitOfWork unitOfWork;
         private readonly IMapper map;
         private readonly ICacheServices cacheServices;
-        public RegionServices(IUnitOfWork unitOfWork, IMapper map,ICacheServices cacheServices)
+        private readonly ILogger<RegionServices> logger;
+        public RegionServices(IUnitOfWork unitOfWork, IMapper map
+            ,ICacheServices cacheServices,ILogger<RegionServices>logger)
         {
             this.unitOfWork = unitOfWork;
             this.map = map;
             this.cacheServices = cacheServices;
+            this.logger = logger;
         }
         public async Task<Region> Add(AddRegionRequestDto regionDto,bool ApplyCache=false,CancellationToken cancellationToken = default)
         {
@@ -32,7 +36,10 @@ namespace NZWalk.Services.Services
             await unitOfWork.region.Add(region);
             await unitOfWork.SaveChanges();
             if(ApplyCache)
+            {
             await cacheServices.SetCache<Region>($"Region-{region.Id}",region);
+                logger.LogWarning("Cache Used");
+            }
             return region;
         }
         
@@ -56,6 +63,7 @@ namespace NZWalk.Services.Services
                 if(RegionCached!=null)
                 {
                     regions = RegionCached;
+                    logger.LogWarning("Cache Used");
                 }
                 else
                 {
@@ -85,6 +93,7 @@ namespace NZWalk.Services.Services
                 {
                     await cacheServices.SetCache<Region>($"Region-{id}", region);
                     await cacheServices.Remove<IEnumerable<Region>>("Regions");
+                    logger.LogInformation("Cache Used");
                 }
                 return region;
             }
@@ -104,6 +113,7 @@ namespace NZWalk.Services.Services
             {
                 await cacheServices.Remove<IEnumerable<Region>>("Regions");
                 await cacheServices.Remove<Region>($"Region-{id}");
+                logger.LogInformation("Cache Used");
             }
             return returned;
 
