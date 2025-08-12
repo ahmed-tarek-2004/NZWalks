@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.ApiExplorer;
+﻿
 using Microsoft.Extensions.Options;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Microsoft.OpenApi.Models;
+using Asp.Versioning.ApiExplorer;
 
 public class SwaggerOptionsConfiguration : IConfigureNamedOptions<SwaggerGenOptions>
 {
@@ -12,7 +13,10 @@ public class SwaggerOptionsConfiguration : IConfigureNamedOptions<SwaggerGenOpti
         this.provider = provider;
     }
 
-    public void Configure(string name, SwaggerGenOptions options) => Configure(options);
+    public void Configure(string name, SwaggerGenOptions options)
+    {
+        Configure(options);
+    }
 
     public void Configure(SwaggerGenOptions options)
     {

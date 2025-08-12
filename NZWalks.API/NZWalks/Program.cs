@@ -1,8 +1,7 @@
+using Asp.Versioning.ApiExplorer;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -74,6 +73,7 @@ namespace NZWalks
             #endregion
             builder.Services.ConfigureOptions<SwaggerOptionsConfiguration>();
             var app = builder.Build();
+            var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
@@ -83,7 +83,6 @@ namespace NZWalks
                 app.UseSwaggerUI(
                     options =>
                 {
-            var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
                     foreach (var description in provider.ApiVersionDescriptions)
                     {
                         options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
