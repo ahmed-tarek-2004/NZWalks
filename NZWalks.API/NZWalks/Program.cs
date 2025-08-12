@@ -1,29 +1,12 @@
 using Asp.Versioning.ApiExplorer;
-using AutoMapper;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using NZWalk.DataAccess.Data;
 using NZWalk.DataAccess.DBInitializer;
-using NZWalk.DataAccess.IRepository;
-using NZWalk.DataAccess.Repository;
-using NZWalk.Services.IServices;
-using NZWalk.Services.Mapping;
-using NZWalk.Services.Services;
 using NZWalk.utility;
 using NZWalk.utility.ConfExstinsion;
-//using NZWalks.API.Configurations;
 using NZWalks.MiddleWare;
-using NZWalks.Validation;
-using Serilog;
-using System.Text;
-
+using System.Threading.RateLimiting;
 namespace NZWalks
 {
     public class Program
@@ -32,19 +15,27 @@ namespace NZWalks
         {
             var builder = WebApplication.CreateBuilder(args);
 
-
             #region SeriLog
             builder.Services.LoggingConfiguration(builder.Logging,builder.Configuration);
             #endregion
 
-            // Add services to the container.
-            builder.Services.AddControllers().ConfigureApiBehaviorOptions(option =>
+            builder.Services.AddRateLimiter(options =>
             {
-                option.SuppressModelStateInvalidFilter = true;
+                options.AddFixedWindowLimiter("FixedWindow", limiterOptions =>
+                {
+                    limiterOptions.PermitLimit = 5; //Max 5 requests
+                    limiterOptions.Window = TimeSpan.FromSeconds(10); // per 10 seconds
+                    limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                    limiterOptions.QueueLimit = 0;
+                });
             });
-          
+
             builder.Services.AddHttpContextAccessor();
 
+            // Add services to the container.
+            #region RateLimiter
+            builder.Services.AddingRateLimiter();
+            #endregion
 
             //// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             #region Dbcontext Adding
@@ -124,6 +115,9 @@ namespace NZWalks
                     await dbInitializer.Initialize();
                 }
             }
+            app.UseRateLimiter();
+            app.MapGet("/test", () => $"Hello! Time: {DateTime.Now}")
+                .RequireRateLimiting("FixedWindow");
             app.Run();
         }
     }

@@ -46,7 +46,6 @@ namespace NZWalks.Controllers.V1
             }
             return Ok(regions);
         }
-
         [HttpPost("Create")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto dto)
