@@ -13,8 +13,8 @@ namespace NZWalk.Services.IServices
     {
 
         public Task<IdentityResult> Register(RegisterDTO registerDTO, CancellationToken cancellationToken = default);
-        public Task<UserDTO> Login(LoginDTO loginDTO, CancellationToken cancellationToken = default);
-        public Task<bool> CahngeRole(Guid Id,string RoleName, CancellationToken cancellationToken = default);
+        public Task<UserDTO> Login(LoginDTO loginDTO, bool ApplyCache = false,CancellationToken cancellationToken = default);
+        public Task<bool> CahngeRole(Guid Id,string RoleName, bool ApplyCache = false, CancellationToken cancellationToken = default);
         public Task<bool> Confirm(string token, string email);
     }
 }
