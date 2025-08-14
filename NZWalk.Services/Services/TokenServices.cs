@@ -31,8 +31,7 @@ namespace NZWalk.Services.Services
                 new Claim(ClaimTypes.Name,user.UserName),
                 new Claim(ClaimTypes.Email,user.Email),
             };
-
-            claims.AddRange(roles.Select(r=>new Claim(ClaimTypes.Role,r)));
+            claims.AddRange(roles.Select(r => new Claim(ClaimTypes.Role, r)));
             var SignInKey =
                             new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
                                    configuration["JWT:SecurityKey"]));

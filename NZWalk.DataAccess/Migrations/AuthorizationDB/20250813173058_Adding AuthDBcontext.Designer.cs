@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NZWalk.DataAccess.Data;
 
@@ -11,9 +12,11 @@ using NZWalk.DataAccess.Data;
 namespace NZWalk.DataAccess.Migrations.AuthorizationDB
 {
     [DbContext(typeof(AuthorizationDBContext))]
-    partial class AuthorizationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20250813173058_Adding AuthDBcontext")]
+    partial class AddingAuthDBcontext
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

@@ -9,7 +9,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NZWalk.DataAccess", "..\NZW
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NZWalk.Services", "..\NZWalk.Services\NZWalk.Services.csproj", "{FD422F6F-F857-3F17-F414-D7138C3A91C0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NZWalk.utility", "..\NZWalk.utility\NZWalk.utility.csproj", "{33D3AED4-50D6-61BE-5772-63422E7F69A8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NZWalk.Utility", "..\NZWalk.utility\NZWalk.Utility.csproj", "{33D3AED4-50D6-61BE-5772-63422E7F69A8}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NZWalk.UI", "NZWalk.UI\NZWalk.UI.csproj", "{DC35BD1B-1F69-4329-9B80-C1CFA0E14C8F}"
 EndProject

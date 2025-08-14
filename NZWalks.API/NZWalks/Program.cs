@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.FileProviders;
 using NZWalk.DataAccess.DBInitializer;
+using NZWalk.Ulity;
 using NZWalk.utility;
 using NZWalk.utility.ConfExstinsion;
 using NZWalks.MiddleWare;
@@ -16,19 +17,14 @@ namespace NZWalks
             var builder = WebApplication.CreateBuilder(args);
 
             #region SeriLog
-            builder.Services.LoggingConfiguration(builder.Logging,builder.Configuration);
+            builder.Services.LoggingConfiguration(builder.Logging, builder.Configuration);
             #endregion
 
-            builder.Services.AddRateLimiter(options =>
+            builder.Services.AddControllers().ConfigureApiBehaviorOptions(option =>
             {
-                options.AddFixedWindowLimiter("FixedWindow", limiterOptions =>
-                {
-                    limiterOptions.PermitLimit = 5; //Max 5 requests
-                    limiterOptions.Window = TimeSpan.FromSeconds(10); // per 10 seconds
-                    limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                    limiterOptions.QueueLimit = 0;
-                });
+                option.SuppressModelStateInvalidFilter = true;
             });
+
 
             builder.Services.AddHttpContextAccessor();
 
@@ -59,6 +55,9 @@ namespace NZWalks
             builder.Services.JWTConfiguration(builder.Configuration);
             #endregion
 
+            #region Email Sender 
+            builder.Services.EmailSenderCongiuration(builder.Configuration);
+            #endregion
             #region Swagger Config
             builder.Services.AddOpenApi();
             builder.Services.AddEndpointsApiExplorer();
@@ -72,7 +71,17 @@ namespace NZWalks
             #region APIVersioning
             builder.Services.AddingAPIVersionging();
             #endregion
-            
+
+            builder.Services.AddCors(option =>
+            {
+                option.AddPolicy("NZWalks", opt =>
+                {
+                    opt.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+                });
+            });
+
             builder.Services.ConfigureOptions<SwaggerOptionsConfiguration>();
             var app = builder.Build();
             var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
@@ -104,6 +113,7 @@ namespace NZWalks
             });
             app.UseMiddleware<TimeEstimate>();
             app.UseMiddleware<GlobalExceptionMiddleWare>();
+            app.UseCors("NZWalks");
             SeedDatabase().GetAwaiter().GetResult();
             app.UseHealthChecks("/health", new HealthCheckOptions());
             app.MapControllers();
