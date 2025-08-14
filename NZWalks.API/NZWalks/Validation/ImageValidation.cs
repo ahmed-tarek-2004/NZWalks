@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using NZWalk.DataAccess.Model.Domin;
-using NZWalk.DataAccess.Model.DTOs; // ✅ correct namespace for ImageFile
+using NZWalk.DataAccess.Model.DTOs;
 
 namespace NZWalks.Validation
 {
