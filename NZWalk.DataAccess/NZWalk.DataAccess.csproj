@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NZWalk.utility\NZWalk.utility.csproj" />
+    <ProjectReference Include="..\NZWalk.utility\NZWalk.Utility.csproj" />
   </ItemGroup>
 
 </Project>

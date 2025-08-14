@@ -39,10 +39,10 @@ namespace NZWalk.DataAccess.DBInitializer
             catch (Exception ex) { }
 
             //create roles if they are not created
-            if (!await _roleManager.RoleExistsAsync(SD.readerRoleId))
+            if (!await _roleManager.RoleExistsAsync(SD.readerRole))
             {
-                await _roleManager.CreateAsync(new IdentityRole(SD.writerRoleId));
-                await _roleManager.CreateAsync(new IdentityRole(SD.readerRoleId));
+                await _roleManager.CreateAsync(new IdentityRole(SD.writerRole));
+                await _roleManager.CreateAsync(new IdentityRole(SD.readerRole));
 
                 IdentityUser user = new IdentityUser
                 {
@@ -52,7 +52,7 @@ namespace NZWalk.DataAccess.DBInitializer
                     PhoneNumber = "112233445566"
                 };
                 await _userManager.CreateAsync(user, "Admin123*");
-                await _userManager.AddToRoleAsync(user, SD.writerRoleId);
+                await _userManager.AddToRoleAsync(user, SD.writerRole);
             }
 
             return;
