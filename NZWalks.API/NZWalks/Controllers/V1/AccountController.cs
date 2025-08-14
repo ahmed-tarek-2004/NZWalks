@@ -27,9 +27,9 @@ namespace NZWalks.Controllers.V1
         public async Task<IActionResult> Register([FromBody] RegisterDTO registerDTO)
         {
             var result = await userServices.Register(registerDTO);
-            if (result.Succeeded == true)
+            if (result.Succeeded)
             {
-                return Ok();
+                return Ok("Check Your Inbox For Email Confirmation");
             }
             return BadRequest(result.Errors);
         }
@@ -70,5 +70,4 @@ namespace NZWalks.Controllers.V1
             else return BadRequest();
         }
     }
-
 }
