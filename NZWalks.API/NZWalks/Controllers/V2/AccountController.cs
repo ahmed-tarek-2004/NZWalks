@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NZWalk.DataAccess.IRepository;
@@ -34,7 +35,7 @@ namespace NZWalks.Controllers.V2
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
         {
-            var result = await userServices.Login(loginDTO);
+            var result = await userServices.Login(loginDTO,true);
             if (result != null)
             {
                 var Token = await tokenServices.CreateJWT(result.user, result.roles);
@@ -46,6 +47,24 @@ namespace NZWalks.Controllers.V2
                
             }
             return Unauthorized("User Not Found");
+        }
+        [Authorize(Roles = "Writer")]
+        [HttpGet("ChangeRole/{Id:guid}")]
+        public async Task<IActionResult> ChangeRole([FromRoute] Guid Id, [FromQuery] string RoleName)
+        {
+            var result = await userServices.CahngeRole(Id, RoleName,true);
+            if (result)
+                return Ok();
+            else
+                return NotFound();
+        }
+        [HttpGet("confirm")]
+        public async Task<IActionResult> confirm([FromQuery] string token, [FromQuery] string email)
+        {
+            var result = await userServices.Confirm(token, email);
+            if (result)
+                return Ok();
+            else return BadRequest();
         }
     }
 }

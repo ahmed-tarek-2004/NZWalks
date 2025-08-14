@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NZWalk.DataAccess.Model.DTOs;
 using NZWalk.Services.IServices;
@@ -20,23 +21,37 @@ namespace NZWalk.Services.Services
     {
         private readonly UserManager<IdentityUser> userManager;
         private readonly RoleManager<IdentityRole> roleManager;
+        private readonly ILogger<UserServices> logger;
+        private readonly ICacheServices cacheServices;
         private readonly IEmailSender emailSender;
         public UserServices(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager
-            , IEmailSender emailSender)
+            , IEmailSender emailSender,ICacheServices cacheServices,ILogger<UserServices>logger)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.emailSender = emailSender;
+            this.cacheServices = cacheServices;
+            this.logger = logger;
         }
 
-        public async Task<bool> CahngeRole(Guid Id, string RoleName, CancellationToken cancellationToken = default)
+        public async Task<bool> CahngeRole(Guid Id, string RoleName, bool ApplyCache = false, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(RoleName) || string.IsNullOrEmpty(Id.ToString()))
             {
                 return false;
             }
-
-            var user = await userManager.FindByIdAsync(Id.ToString());
+            var user = new IdentityUser();
+            if(ApplyCache)
+            {
+                user = await cacheServices.GetCache<IdentityUser>($"User-{user.Id}");
+                if (user == null)
+                {
+                    logger.LogInformation("Cache User");
+                    user = await userManager.FindByIdAsync(Id.ToString());
+                }
+            }
+            else
+               user = await userManager.FindByIdAsync(Id.ToString());
             if (user != null)
             {
                 var userRole = await userManager.GetRolesAsync(user);
@@ -53,9 +68,22 @@ namespace NZWalk.Services.Services
             return false;
         }
 
-        public async Task<UserDTO> Login(LoginDTO loginDTO, CancellationToken cancellationToken = default)
+        public async Task<UserDTO> Login(LoginDTO loginDTO, bool ApplyCache=false,CancellationToken cancellationToken = default)
         {
-            var user = await userManager.FindByEmailAsync(loginDTO.Email);
+            var user = new IdentityUser();
+            if(ApplyCache)
+            {
+                user = await cacheServices.GetCache<IdentityUser>($"User-{user.Id}");
+                logger.LogInformation("Cache User");
+                if (user== null)
+                {
+                    user = await userManager.FindByEmailAsync(loginDTO.Email);
+                    if(user!=null)
+                    await cacheServices.SetCache<IdentityUser>($"User-{user.Id}",user);
+                }
+            }
+            else
+            user = await userManager.FindByEmailAsync(loginDTO.Email);
             if (user == null)
             {
                 return null;
@@ -96,12 +124,11 @@ namespace NZWalk.Services.Services
                 var confirmLink = $"https://ahmed-tarek2023.github.io/EmailConfirmation/?token={code}&email={user.Email}";
 
                 await emailSender.SendEmailAsync(user.Email, "Confirm Your Email", $@"
-<h2>Confirm Your Email</h2>
-<p>Hello {user.Email.Substring(0, user.Email.IndexOf("@"))},</p>
-<p>Please click the link below to confirm your email:</p>
-<p><a href='{confirmLink}'>Confirm Email</a></p>
-<p>If you did not register, ignore this email.</p>");
-
+                                                <h2>Confirm Your Email</h2>
+                                                <p>Hello {user.Email.Substring(0, user.Email.IndexOf("@"))},</p>
+                                                <p>Please click the link below to confirm your email:</p>
+                                                <p><a href='{confirmLink}'>Confirm Email</a></p>
+                                                <p>If you did not register, ignore this email.</p>");
 
                 return await userManager.AddToRolesAsync(user, registerDTO.Roles);
             }
