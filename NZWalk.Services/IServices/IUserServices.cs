@@ -15,6 +15,8 @@ namespace NZWalk.Services.IServices
         public Task<IdentityResult> Register(RegisterDTO registerDTO, CancellationToken cancellationToken = default);
         public Task<UserDTO> Login(LoginDTO loginDTO, bool ApplyCache = false,CancellationToken cancellationToken = default);
         public Task<bool> CahngeRole(Guid Id,string RoleName, bool ApplyCache = false, CancellationToken cancellationToken = default);
-        public Task<bool> Confirm(string token, string email);
+        public Task<bool> Confirm(string token, string email,bool ApplyCache=true,CancellationToken cts=default);
+        public Task<bool> reset_password(string email, bool ApplyCache = true, CancellationToken cts=default);
+        public Task<bool> Confirm_pass(string token,string email,string pass, bool ApplyCache = true,CancellationToken cts=default);
     }
 }

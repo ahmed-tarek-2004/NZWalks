@@ -17,8 +17,8 @@ namespace NZWalks.Controllers.V1
     {
         private readonly IUserServices userServices;
         private readonly ITokenServices tokenServices;
-       
-        public AccountController(IUserServices userServices,ITokenServices tokenServices)
+
+        public AccountController(IUserServices userServices, ITokenServices tokenServices)
         {
             this.userServices = userServices;
             this.tokenServices = tokenServices;
@@ -46,28 +46,48 @@ namespace NZWalks.Controllers.V1
                     token = new JwtSecurityTokenHandler().WriteToken(Token),
                     Expires = DateTime.UtcNow.AddMinutes(15)
                 });
-               
+
             }
             return Unauthorized("Not Found");
         }
 
-        [Authorize(Roles ="Writer")]
+        [Authorize(Roles = "Writer")]
         [HttpGet("ChangeRole/{Id:guid}")]
-        public async Task<IActionResult> ChangeRole([FromRoute]Guid Id, [FromQuery]string RoleName)
+        public async Task<IActionResult> ChangeRole([FromRoute] Guid Id, [FromQuery] string RoleName)
         {
-           var result= await userServices.CahngeRole(Id,RoleName);
+            var result = await userServices.CahngeRole(Id, RoleName);
             if (result)
                 return Ok();
             else
-                return NotFound(); 
+                return NotFound();
         }
         [HttpGet("confirm")]
-        public async Task<IActionResult>confirm([FromQuery]string token, [FromQuery]string email)
+        public async Task<IActionResult> confirm([FromQuery] string token, [FromQuery] string email)
         {
-            var result = await userServices.Confirm(token ,email);
+            var result = await userServices.Confirm(token, email);
             if (result)
                 return Ok();
             else return BadRequest();
+        }
+        [HttpGet("reset-password")]
+        public async Task<IActionResult> reset_password([FromQuery] string email)
+        {
+            var result = await userServices.reset_password(email);
+            if (result)
+                return Ok("Check Your Email To Complete Reset Process");
+            else return BadRequest();
+        }
+        [HttpPost("confirm-pass")]
+        public async Task<IActionResult> confirm_pass([FromBody] ResetPassword reset)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await userServices.Confirm_pass( reset.Token, reset.Email, reset.Password);
+                if (result)
+                    return Ok("Reset Successful");
+                else return BadRequest();
+            }
+            return BadRequest(ModelState);
         }
     }
 }

@@ -63,10 +63,30 @@ namespace NZWalks.Controllers.V2
         [HttpGet("confirm")]
         public async Task<IActionResult> confirm([FromQuery] string token, [FromQuery] string email)
         {
-            var result = await userServices.Confirm(token, email);
+            var result = await userServices.Confirm(token, email,true);
             if (result)
                 return Ok();
             else return BadRequest();
+        }
+        [HttpGet("reset-password")]
+        public async Task<IActionResult> reset_password([FromQuery] string email)
+        {
+            var result = await userServices.reset_password(email,true);
+            if (result)
+                return Ok("Check Your Email To Complete Reset Process");
+            else return BadRequest();
+        }
+        [HttpPost("confirm-pass")]
+        public async Task<IActionResult> confirm_pass([FromBody] ResetPassword reset)
+        {
+            if (ModelState.IsValid)
+            {
+                var result = await userServices.Confirm_pass(reset.Token, reset.Email, reset.Password,true);
+                if (result)
+                    return Ok("Reset Successful");
+                else return BadRequest();
+            }
+            return BadRequest(ModelState);
         }
     }
 }
