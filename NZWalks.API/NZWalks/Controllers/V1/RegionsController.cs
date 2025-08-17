@@ -1,6 +1,8 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using NZWalk.DataAccess.Data;
 using NZWalk.DataAccess.Model.Domin;
 using NZWalk.DataAccess.Model.DTOs;
@@ -24,19 +26,21 @@ namespace NZWalks.Controllers.V1
         }
 
         [HttpGet("GetAll")]
-        public async Task<IActionResult> GetAll([FromQuery]string? Properties=null,[FromQuery]string?order=null
-            ,[FromQuery]bool?isDescending=false)
+        [Authorize]
+        public async Task<IActionResult> GetAll([FromQuery] string? Properties = null, [FromQuery] string? order = null
+            , [FromQuery] bool? isDescending = false)
         {
-            var regions = await services.GetALL(Properties,order,isDescending);
-            if (regions == null)
-            {
-                return BadRequest();
-            }
-            var ListResions = regions.ToList();
-            return Ok(ListResions);
+                var regions = await services.GetALL(Properties, order, isDescending);
+                if (regions == null)
+                {
+                    return BadRequest();
+                }
+                var ListResions = regions.ToList();
+                return Ok(ListResions);
         }
 
         [HttpGet("GetById/{Id:Guid}")]
+        [Authorize]
         public async Task<IActionResult> GetById([FromRoute] Guid Id)
         {
             var regions = await services.Get(Id);
@@ -48,30 +52,33 @@ namespace NZWalks.Controllers.V1
         }
         [HttpPost("Create")]
         [ServiceFilter(typeof(ValidationFilter))]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto dto)
         {
-    
-                if (dto == null)
-                {
-                    return BadRequest();
-                }
-                var region = await services.Add(dto);
-                return CreatedAtAction(nameof(GetById), new { region.Id }, region);
+
+            if (dto == null)
+            {
+                return BadRequest();
+            }
+            var region = await services.Add(dto);
+            return CreatedAtAction(nameof(GetById), new { region.Id }, region);
         }
 
         [HttpPut("Update/{id:guid}")]
         [ServiceFilter(typeof(ValidationFilter))]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto dto)
         {
-                var region = await services.Update(id, dto);
-                if (region is null)
-                {
-                    return BadRequest();
-                }
-                return Ok($"Updated \n{region}");
+            var region = await services.Update(id, dto);
+            if (region is null)
+            {
+                return BadRequest();
+            }
+            return Ok($"Updated \n{region}");
         }
 
         [HttpDelete("Delete/{Id:Guid}")]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> Delete([FromRoute] Guid Id)
         {
             var region = await services.Delete(Id);

@@ -58,6 +58,7 @@ namespace NZWalks
             #region Email Sender 
             builder.Services.EmailSenderCongiuration(builder.Configuration);
             #endregion
+
             #region Swagger Config
             builder.Services.AddOpenApi();
             builder.Services.AddEndpointsApiExplorer();
@@ -114,6 +115,7 @@ namespace NZWalks
             app.UseMiddleware<TimeEstimate>();
             app.UseMiddleware<GlobalExceptionMiddleWare>();
             app.UseCors("NZWalks");
+            //app.usepo
             SeedDatabase().GetAwaiter().GetResult();
             app.UseHealthChecks("/health", new HealthCheckOptions());
             app.MapControllers();
