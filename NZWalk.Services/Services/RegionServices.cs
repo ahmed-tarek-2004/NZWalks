@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using NZWalk.DataAccess.IRepository;
@@ -53,6 +54,7 @@ namespace NZWalk.Services.Services
             var regionDto = map.Map<RegionDTO>(region);
             return regionDto;
         }
+        [EnableRateLimiting("SlidingWindow")]
         public async Task<IEnumerable<RegionDTO>> GetALL(string? Properity = null, string? order = null
             , bool? IsDescending = false, bool ApplyingCache = false, CancellationToken cancellationToken = default)
         {

@@ -219,10 +219,19 @@ namespace NZWalk.utility.ConfExstinsion
                     limiterOptions.PermitLimit = 5;
                     limiterOptions.Window = TimeSpan.FromSeconds(60);
                     limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-                    limiterOptions.QueueLimit = 0;
-                });
+                    limiterOptions.QueueLimit = 3;
+                }).RejectionStatusCode = 429;
+                options.AddSlidingWindowLimiter("SlidingWindow", limiterOptions =>
+                {
+                    limiterOptions.PermitLimit = 60;
+                    limiterOptions.Window = TimeSpan.FromSeconds(60);
+                    limiterOptions.SegmentsPerWindow = 180;
+                    limiterOptions.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+                    limiterOptions.QueueLimit = 3;
+                }).RejectionStatusCode=429;
             });
             return services;
         }
+
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using NZWalk.DataAccess.IRepository;
 using NZWalk.DataAccess.Model.DTOs;
 using NZWalk.Services.IServices;
@@ -32,6 +33,7 @@ namespace NZWalks.Controllers.V2
             }
             return BadRequest(result.Errors);
         }
+        [EnableRateLimiting("SlidingWindow")]
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginDTO loginDTO)
         {

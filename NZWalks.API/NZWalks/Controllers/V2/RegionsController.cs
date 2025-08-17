@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NZWalk.DataAccess.Data;
@@ -28,6 +29,7 @@ namespace NZWalks.Controllers.V2
         }
 
         [HttpGet("GetAll")]
+        [Authorize]
         public async Task<IActionResult> GetAll([FromQuery] string? Properties = null, [FromQuery] string? order = null
             , [FromQuery] bool? isDescending = false)
         {
@@ -42,6 +44,7 @@ namespace NZWalks.Controllers.V2
         }
 
         [HttpGet("GetById/{Id:Guid}")]
+        [Authorize]
         public async Task<IActionResult> GetById([FromRoute] Guid Id)
         {
             var regions = await services.Get(Id,true);
@@ -54,6 +57,7 @@ namespace NZWalks.Controllers.V2
 
         [HttpPost("Create")]
         [ServiceFilter(typeof(ValidationFilter))]
+        [Authorize(Roles ="Writer")]
         public async Task<IActionResult> Create([FromBody] AddRegionRequestDto dto)
         {
 
@@ -66,6 +70,7 @@ namespace NZWalks.Controllers.V2
         }
 
         [HttpPut("Update/{id:guid}")]
+        [Authorize(Roles = "Writer")]
         [ServiceFilter(typeof(ValidationFilter))]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateRegionRequestDto dto)
         {
@@ -78,6 +83,7 @@ namespace NZWalks.Controllers.V2
         }
 
         [HttpDelete("Delete/{Id:Guid}")]
+        [Authorize(Roles = "Writer")]
         public async Task<IActionResult> Delete([FromRoute] Guid Id)
         {
             var region = await services.Delete(Id, true);
