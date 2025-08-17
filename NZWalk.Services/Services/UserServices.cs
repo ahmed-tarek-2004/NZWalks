@@ -25,7 +25,7 @@ namespace NZWalk.Services.Services
         private readonly ICacheServices cacheServices;
         private readonly IEmailSender emailSender;
         public UserServices(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager
-            , IEmailSender emailSender,ICacheServices cacheServices,ILogger<UserServices>logger)
+            , IEmailSender emailSender, ICacheServices cacheServices, ILogger<UserServices> logger)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
@@ -41,9 +41,9 @@ namespace NZWalk.Services.Services
                 return false;
             }
             var user = new IdentityUser();
-            if(ApplyCache)
+            if (ApplyCache)
             {
-                user = await cacheServices.GetCache<IdentityUser>($"User-{user.Id}");
+                user = await cacheServices.GetCache<IdentityUser>($"User-{Id}");
                 if (user == null)
                 {
                     logger.LogInformation("Cache User");
@@ -51,7 +51,7 @@ namespace NZWalk.Services.Services
                 }
             }
             else
-               user = await userManager.FindByIdAsync(Id.ToString());
+                user = await userManager.FindByIdAsync(Id.ToString());
             if (user != null)
             {
                 var userRole = await userManager.GetRolesAsync(user);
@@ -68,22 +68,25 @@ namespace NZWalk.Services.Services
             return false;
         }
 
-        public async Task<UserDTO> Login(LoginDTO loginDTO, bool ApplyCache=false,CancellationToken cancellationToken = default)
+        public async Task<UserDTO> Login(LoginDTO loginDTO, bool ApplyCache = false, CancellationToken cancellationToken = default)
         {
             var user = new IdentityUser();
-            if(ApplyCache)
+            if (ApplyCache)
             {
-                user = await cacheServices.GetCache<IdentityUser>($"User-{user.Id}");
+                user = await cacheServices.GetCache<IdentityUser>($"User-{loginDTO.Email}");
                 logger.LogInformation("Cache User");
-                if (user== null)
+                if (user == null)
                 {
                     user = await userManager.FindByEmailAsync(loginDTO.Email);
-                    if(user!=null)
-                    await cacheServices.SetCache<IdentityUser>($"User-{user.Id}",user);
+                    if (user != null)
+                    {
+                        await cacheServices.SetCache<IdentityUser>($"User-{user.Email}", user);
+                        await cacheServices.SetCache<IdentityUser>($"User-{user.Id}", user);
+                    }
                 }
             }
             else
-            user = await userManager.FindByEmailAsync(loginDTO.Email);
+                user = await userManager.FindByEmailAsync(loginDTO.Email);
             if (user == null)
             {
                 return null;
@@ -133,13 +136,29 @@ namespace NZWalk.Services.Services
                 return await userManager.AddToRolesAsync(user, registerDTO.Roles);
             }
         }
-        public async Task<bool> Confirm(string token, string email)
+        public async Task<bool> Confirm(string token, string email, bool ApplyCache = true, CancellationToken cts = default)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
             {
                 return false;
             }
-            var user = await userManager.FindByEmailAsync(email);
+            var user = new IdentityUser();
+            if (ApplyCache)
+            {
+                user = await cacheServices.GetCache<IdentityUser>($"User-{email}");
+                if (user == null)
+                {
+                    user = await userManager.FindByEmailAsync(email);
+                    if (user != null)
+                    {
+                        await cacheServices.SetCache<IdentityUser>($"User-{user.Email}", user);
+                        await cacheServices.SetCache<IdentityUser>($"User-{user.Id}", user);
+                    }
+                }
+            }
+            else
+                user = await userManager.FindByEmailAsync(email);
+
             if (user == null)
             {
                 return false;
@@ -150,6 +169,78 @@ namespace NZWalk.Services.Services
                 return true;
             }
             return false;
+        }
+        public async Task<bool> reset_password(string email, bool ApplyCache = true, CancellationToken cts = default)
+        {
+            if (!string.IsNullOrEmpty(email))
+            {
+                var user = new IdentityUser();
+                if (ApplyCache)
+                {
+                    user = await cacheServices.GetCache<IdentityUser>($"User-{email}");
+                    if (user == null)
+                    {
+                        user = await userManager.FindByEmailAsync(email);
+                        if (user != null)
+                        {
+                            await cacheServices.SetCache<IdentityUser>($"User-{user.Email}", user);
+                            await cacheServices.SetCache<IdentityUser>($"User-{user.Id}", user);
+                        }
+                    }
+                }
+                else
+                    user = await userManager.FindByEmailAsync(email);
+                if (user != null)
+                {
+                    var result = await userManager.IsEmailConfirmedAsync(user);
+                    if (result)
+                    {
+                        var code = await userManager.GeneratePasswordResetTokenAsync(user);
+                        //  logger.LogWarning($"the code is {code}");
+                        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+                        var confirmLink = $"https://ahmed-tarek2023.github.io/resetPassword/?token={code}&email={user.Email}";
+
+                        await emailSender.SendEmailAsync(user.Email, "Reset Your Password", $@"
+                                                <h2>Confirm Your Email</h2>
+                                                <p>Hello {user.Email.Substring(0, user.Email.IndexOf("@"))},</p>
+                                                <p>Please click the link below to Reset Ur Password:</p>
+                                                <p><a href='{confirmLink}'>ResetPasswod</a></p>
+                                                <p>If you did not Asking for Reset, ignore this email.</p>");
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        public async Task<bool> Confirm_pass(string token, string email, string pass, bool ApplyCache = true, CancellationToken cts = default)
+        {
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(pass))
+            {
+                return false;
+            }
+            var user = new IdentityUser();
+            if (ApplyCache)
+            {
+                user = await cacheServices.GetCache<IdentityUser>($"User-{email}");
+                if (user == null)
+                {
+                    user = await userManager.FindByEmailAsync(email);
+                    if (user != null)
+                    {
+                        await cacheServices.SetCache<IdentityUser>($"User-{user.Email}", user);
+                        await cacheServices.SetCache<IdentityUser>($"User-{user.Id}", user);
+                    }
+                }
+            }
+            else
+                user = await userManager.FindByEmailAsync(email);
+
+            if (user == null)
+            {
+                return false;
+            }
+            var result = await userManager.ResetPasswordAsync(user, Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(token)), pass);
+            return result.Succeeded;
         }
     }
 }
