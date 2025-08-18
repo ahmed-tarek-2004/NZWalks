@@ -6,7 +6,7 @@ using NZWalk.UI.Models; // RegionDTO
 public class RegionController : Controller
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly string _baseUrl = "https://localhost:7136/api/v2/Regions";
+    private readonly string _baseUrl = "http://localhost:5146/api/v1/Regions";
 
     public RegionController(IHttpClientFactory httpClientFactory)
     {
@@ -37,6 +37,7 @@ public class RegionController : Controller
             return View(region);
 
         var client = _httpClientFactory.CreateClient();
+
         var response = await client.PostAsJsonAsync($"{_baseUrl}/Create", region);
 
         if (response.IsSuccessStatusCode)
