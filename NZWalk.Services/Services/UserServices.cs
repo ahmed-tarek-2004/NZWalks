@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
@@ -24,34 +25,25 @@ namespace NZWalk.Services.Services
         private readonly ILogger<UserServices> logger;
         private readonly ICacheServices cacheServices;
         private readonly IEmailSender emailSender;
+        private readonly IMapper mapper;
         public UserServices(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager
-            , IEmailSender emailSender, ICacheServices cacheServices, ILogger<UserServices> logger)
+            , IEmailSender emailSender, ICacheServices cacheServices, ILogger<UserServices> logger, IMapper mapper)
         {
             this.userManager = userManager;
             this.roleManager = roleManager;
             this.emailSender = emailSender;
             this.cacheServices = cacheServices;
             this.logger = logger;
+            this.mapper = mapper;
         }
 
         public async Task<bool> CahngeRole(Guid Id, string RoleName, bool ApplyCache = false, CancellationToken cancellationToken = default)
         {
-            if (string.IsNullOrEmpty(RoleName) || string.IsNullOrEmpty(Id.ToString()))
+            if (string.IsNullOrEmpty(RoleName) || Id == Guid.Empty)
             {
                 return false;
             }
-            var user = new IdentityUser();
-            if (ApplyCache)
-            {
-                user = await cacheServices.GetCache<IdentityUser>($"User-{Id}");
-                if (user == null)
-                {
-                    logger.LogInformation("Cache User");
-                    user = await userManager.FindByIdAsync(Id.ToString());
-                }
-            }
-            else
-                user = await userManager.FindByIdAsync(Id.ToString());
+            var user = await userManager.FindByIdAsync(Id.ToString());
             if (user != null)
             {
                 var userRole = await userManager.GetRolesAsync(user);
@@ -70,23 +62,8 @@ namespace NZWalk.Services.Services
 
         public async Task<UserDTO> Login(LoginDTO loginDTO, bool ApplyCache = false, CancellationToken cancellationToken = default)
         {
-            var user = new IdentityUser();
-            if (ApplyCache)
-            {
-                user = await cacheServices.GetCache<IdentityUser>($"User-{loginDTO.Email}");
-                logger.LogInformation("Cache User");
-                if (user == null)
-                {
-                    user = await userManager.FindByEmailAsync(loginDTO.Email);
-                    if (user != null)
-                    {
-                        await cacheServices.SetCache<IdentityUser>($"User-{user.Email}", user);
-                        await cacheServices.SetCache<IdentityUser>($"User-{user.Id}", user);
-                    }
-                }
-            }
-            else
-                user = await userManager.FindByEmailAsync(loginDTO.Email);
+
+            var user = await userManager.FindByEmailAsync(loginDTO.Email);
             if (user == null)
             {
                 return null;
@@ -96,7 +73,7 @@ namespace NZWalk.Services.Services
             {
                 return null;
             }
-            var UserRoles = (List<string>)await userManager.GetRolesAsync(user);
+            var UserRoles = (await userManager.GetRolesAsync(user)).ToList();
             return new UserDTO()
             {
                 roles = UserRoles,
@@ -136,28 +113,13 @@ namespace NZWalk.Services.Services
                 return await userManager.AddToRolesAsync(user, registerDTO.Roles);
             }
         }
-        public async Task<bool> Confirm(string token, string email, bool ApplyCache = true, CancellationToken cts = default)
+        public async Task<bool> Confirm(string token, string email, bool ApplyCache = false, CancellationToken cts = default)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token))
             {
                 return false;
             }
-            var user = new IdentityUser();
-            if (ApplyCache)
-            {
-                user = await cacheServices.GetCache<IdentityUser>($"User-{email}");
-                if (user == null)
-                {
-                    user = await userManager.FindByEmailAsync(email);
-                    if (user != null)
-                    {
-                        await cacheServices.SetCache<IdentityUser>($"User-{user.Email}", user);
-                        await cacheServices.SetCache<IdentityUser>($"User-{user.Id}", user);
-                    }
-                }
-            }
-            else
-                user = await userManager.FindByEmailAsync(email);
+            var user = await userManager.FindByEmailAsync(email);
 
             if (user == null)
             {
@@ -170,26 +132,11 @@ namespace NZWalk.Services.Services
             }
             return false;
         }
-        public async Task<bool> reset_password(string email, bool ApplyCache = true, CancellationToken cts = default)
+        public async Task<bool> reset_password(string email, bool ApplyCache = false, CancellationToken cts = default)
         {
             if (!string.IsNullOrEmpty(email))
             {
-                var user = new IdentityUser();
-                if (ApplyCache)
-                {
-                    user = await cacheServices.GetCache<IdentityUser>($"User-{email}");
-                    if (user == null)
-                    {
-                        user = await userManager.FindByEmailAsync(email);
-                        if (user != null)
-                        {
-                            await cacheServices.SetCache<IdentityUser>($"User-{user.Email}", user);
-                            await cacheServices.SetCache<IdentityUser>($"User-{user.Id}", user);
-                        }
-                    }
-                }
-                else
-                    user = await userManager.FindByEmailAsync(email);
+                var user = await userManager.FindByEmailAsync(email);
                 if (user != null)
                 {
                     var result = await userManager.IsEmailConfirmedAsync(user);
@@ -212,28 +159,13 @@ namespace NZWalk.Services.Services
             }
             return false;
         }
-        public async Task<bool> Confirm_pass(string token, string email, string pass, bool ApplyCache = true, CancellationToken cts = default)
+        public async Task<bool> Confirm_pass(string token, string email, string pass, bool ApplyCache = false, CancellationToken cts = default)
         {
             if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(token) || string.IsNullOrEmpty(pass))
             {
                 return false;
             }
-            var user = new IdentityUser();
-            if (ApplyCache)
-            {
-                user = await cacheServices.GetCache<IdentityUser>($"User-{email}");
-                if (user == null)
-                {
-                    user = await userManager.FindByEmailAsync(email);
-                    if (user != null)
-                    {
-                        await cacheServices.SetCache<IdentityUser>($"User-{user.Email}", user);
-                        await cacheServices.SetCache<IdentityUser>($"User-{user.Id}", user);
-                    }
-                }
-            }
-            else
-                user = await userManager.FindByEmailAsync(email);
+            var user = await userManager.FindByEmailAsync(email);
 
             if (user == null)
             {

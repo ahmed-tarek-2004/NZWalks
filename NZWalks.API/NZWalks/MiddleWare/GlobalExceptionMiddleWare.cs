@@ -23,6 +23,7 @@ namespace NZWalks.MiddleWare
             {
                 var errorId = Guid.NewGuid();
                 logger.LogError($"ErrorId{errorId} : {ex.Message} ");
+                logger.LogError($"{context.Request.Path}");
 
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 context.Response.ContentType = "application/json";
