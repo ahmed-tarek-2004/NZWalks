@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using NZWalk.DataAccess.Model.Domin;
 using NZWalk.DataAccess.Model.DTOs;
 using System;
@@ -12,15 +13,18 @@ namespace NZWalk.Services.Mapping
     public class AutoMapperProfiles : Profile
     {
 
-        public AutoMapperProfiles() 
-        { 
+        public AutoMapperProfiles()
+        {
             CreateMap<RegionDTO, Region>().ReverseMap();
             CreateMap<AddRegionRequestDto, Region>().ReverseMap();
             CreateMap<UpdateRegionRequestDto, Region>().ReverseMap();
             CreateMap<AddWalkDto, Walk>().ReverseMap();
             CreateMap<UpdateWalkDto, Walk>()
             .ReverseMap();
-            //        CreateMap<UserDto, User>()
+            CreateMap<UserCaching, IdentityUser>()
+                .ForMember(des => des.UserName, opt => opt.MapFrom(b => b.Name))
+                .ReverseMap();
+            //  CreateMap<UserDto, User>()
             //.ForMember(dest => dest.CreatedAt, opti 
             CreateMap<WalkDto, Walk>().ReverseMap();
             CreateMap<ImageFileDTO, ImageFile>()
