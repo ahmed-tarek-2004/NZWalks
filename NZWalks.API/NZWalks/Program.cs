@@ -6,6 +6,8 @@ using NZWalk.DataAccess.DBInitializer;
 using NZWalk.Ulity;
 using NZWalk.utility;
 using NZWalk.utility.ConfExstinsion;
+using Scrutor;
+using NZWalk.Services.IServices;
 using NZWalks.MiddleWare;
 using System.Threading.RateLimiting;
 namespace NZWalks
@@ -54,6 +56,18 @@ namespace NZWalks
             builder.Services.Configure<JWTToken>(builder.Configuration.GetSection("JWT"));
             builder.Services.JWTConfiguration(builder.Configuration);
             #endregion
+
+
+
+
+
+           
+
+
+
+
+
+
 
             #region Email Sender 
             builder.Services.EmailSenderCongiuration(builder.Configuration);
