@@ -57,17 +57,11 @@ namespace NZWalks
             builder.Services.JWTConfiguration(builder.Configuration);
             #endregion
 
-
-
-
-
             builder.Services.Scan(scan => scan
            .FromAssemblyOf<IUserServices>()   // choose an assembly to scan
            .AddClasses()                     // find all classes
            .AsImplementedInterfaces()        // register them against their interfaces
            .WithScopedLifetime());
-
-
 
             #region Email Sender 
             builder.Services.EmailSenderCongiuration(builder.Configuration);
