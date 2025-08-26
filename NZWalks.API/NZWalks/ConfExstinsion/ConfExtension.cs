@@ -67,7 +67,7 @@ namespace NZWalk.utility.ConfExstinsion
             services.AddScoped<IRegionServices, RegionServices>();
             services.AddScoped<ITokenServices, TokenServices>();
             services.AddScoped<IImageServices, ImageServices>();
-            services.AddScoped<ICacheServices, CacheServices>();
+            services.AddSingleton<ICacheServices, CacheServices>();
             services.AddScoped<IDbInitializer, DbInitializer>();
             services.AddScoped<IWalkServices, WalkServices>();
             services.AddScoped<IUserServices, UserServices>();
