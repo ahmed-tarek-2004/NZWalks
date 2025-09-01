@@ -64,13 +64,19 @@ namespace NZWalk.utility.ConfExstinsion
         }
         public static IServiceCollection AddingDependencyInjection(this IServiceCollection services)
         {
-            services.AddScoped<IRegionServices, RegionServices>();
-            services.AddScoped<ITokenServices, TokenServices>();
-            services.AddScoped<IImageServices, ImageServices>();
-            services.AddSingleton<ICacheServices, CacheServices>();
+            //services.AddScoped<IRegionServices, RegionServices>();
+            //services.AddScoped<ITokenServices, TokenServices>();
+            //services.AddScoped<IImageServices, ImageServices>();
+            //services.AddSingleton<ICacheServices, CacheServices>();
+            //services.AddScoped<IWalkServices, WalkServices>();
+            //services.AddScoped<IUserServices, UserServices>();
+            services.Scan(scan => scan
+           .FromAssemblyOf<IUserServices>()   // choose an assembly to scan
+           .AddClasses()                     // find all classes
+           .AsImplementedInterfaces()        // register them against their interfaces
+           .WithScopedLifetime());
+
             services.AddScoped<IDbInitializer, DbInitializer>();
-            services.AddScoped<IWalkServices, WalkServices>();
-            services.AddScoped<IUserServices, UserServices>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<ValidationFilter>();
