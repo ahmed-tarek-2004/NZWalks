@@ -92,6 +92,8 @@ namespace NZWalk.DataAccess.Data
         }
 
         public DbSet<Difficulty> Difficulties { get; set; }
+        //assign for creating tables
+        //test
         public DbSet<Region> Regions { get; set; }
         public DbSet<Walk> Walks { get; set; }
         public DbSet<ImageFile> Images { get; set; }
