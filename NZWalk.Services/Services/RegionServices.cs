@@ -54,7 +54,7 @@ namespace NZWalk.Services.Services
             var regionDto = map.Map<RegionDTO>(region);
             return regionDto;
         }
-        //[EnableRateLimiting("SlidingWindow")]
+        [EnableRateLimiting("SlidingWindow")]
         public async Task<IEnumerable<RegionDTO>> GetALL(string? Properity = null, string? order = null
             , bool? IsDescending = false, bool ApplyingCache = false, CancellationToken cancellationToken = default)
         {

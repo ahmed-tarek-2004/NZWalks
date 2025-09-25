@@ -87,7 +87,7 @@ namespace NZWalk.Services.Services
             var user = new IdentityUser()
             {
                 Email = registerDTO.Email,
-                UserName = registerDTO.Email+"Yasser"
+                UserName = registerDTO.Email.Substring(0, registerDTO.Email.IndexOf("@")),
                 //PasswordHash = registerDTO.Password
             };
             //await userManager.ConfirmEmailAsync(user, "Ahmed@gmail.com");

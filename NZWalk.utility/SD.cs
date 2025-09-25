@@ -6,6 +6,5 @@
         public static string writerRoleId = "c309fa92-2123-47be-b397-a1c77adb502c";
         public static string readerRole = "Reader";
         public static string writerRole = "Writer";
-     
     }
 }

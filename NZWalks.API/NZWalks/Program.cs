@@ -1,16 +1,14 @@
 using Asp.Versioning.ApiExplorer;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.FileProviders;
 using NZWalk.DataAccess.DBInitializer;
-using NZWalk.Services.IServices;
 using NZWalk.Ulity;
 using NZWalk.utility;
 using NZWalk.utility.ConfExstinsion;
-using NZWalks.MiddleWare;
 using Scrutor;
-using StackExchange.Redis;
+using NZWalk.Services.IServices;
+using NZWalks.MiddleWare;
 using System.Threading.RateLimiting;
 namespace NZWalks
 {
@@ -47,28 +45,23 @@ namespace NZWalks
             #endregion
 
             #region Adding Redis
-            //  builder.Services.CacheConfiguration(builder.Configuration);
-            builder.Services.AddStackExchangeRedisCache(options =>
-            {
-                var connectionString = builder.Configuration.GetConnectionString("Redis");
-                var config = ConfigurationOptions.Parse(connectionString);
-                config.Ssl = true;
-                config.AbortOnConnectFail = false;
-
-                options.ConfigurationOptions = config;
-            });
+            builder.Services.CacheConfiguration(builder.Configuration);
             #endregion
 
             #region HealthCheck
             builder.Services.HealthCheck(builder.Configuration);
             #endregion
 
-
-
             #region JWT Config
             builder.Services.Configure<JWTToken>(builder.Configuration.GetSection("JWT"));
             builder.Services.JWTConfiguration(builder.Configuration);
             #endregion
+
+            builder.Services.Scan(scan => scan
+           .FromAssemblyOf<IUserServices>()   // choose an assembly to scan
+           .AddClasses()                     // find all classes
+           .AsImplementedInterfaces()        // register them against their interfaces
+           .WithScopedLifetime());
 
             #region Email Sender 
             builder.Services.EmailSenderCongiuration(builder.Configuration);
@@ -108,7 +101,6 @@ namespace NZWalks
                 app.MapOpenApi();
                 app.UseSwagger();
                 app.UseSwaggerUI(
-
                     options =>
                 {
                     foreach (var description in provider.ApiVersionDescriptions)
@@ -146,8 +138,6 @@ namespace NZWalks
             app.UseRateLimiter();
             app.MapGet("/test", () => $"Hello! Time: {DateTime.Now}")
                 .RequireRateLimiting("FixedWindow");
-            
-
             app.Run();
         }
     }
