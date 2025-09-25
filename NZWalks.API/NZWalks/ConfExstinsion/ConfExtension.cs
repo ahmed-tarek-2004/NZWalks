@@ -80,6 +80,7 @@ namespace NZWalk.utility.ConfExstinsion
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IEmailSender, EmailSender>();
             services.AddScoped<ValidationFilter>();
+            //services.AddScoped<CloudinaryServices>();
             services.AddScoped<ImageValidation>();
             services.AddAutoMapper(typeof(AutoMapperProfiles).Assembly);
             services.AddIdentity<IdentityUser, IdentityRole>(options =>

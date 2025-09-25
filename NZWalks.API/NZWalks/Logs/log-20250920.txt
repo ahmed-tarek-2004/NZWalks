@@ -1,0 +1,31 @@
+2025-09-20 03:59:21.287 +03:00 [INF] User profile is available. Using 'C:\Users\DESKTOP\AppData\Local\ASP.NET\DataProtection-Keys' as key repository and Windows DPAPI to encrypt keys at rest.
+2025-09-20 03:59:22.818 +03:00 [INF] Executed DbCommand (22ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT 1
+2025-09-20 03:59:22.862 +03:00 [INF] Executed DbCommand (20ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT OBJECT_ID(N'[__EFMigrationsHistory]');
+2025-09-20 03:59:22.893 +03:00 [INF] Executed DbCommand (11ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT [MigrationId], [ProductVersion]
+FROM [__EFMigrationsHistory]
+ORDER BY [MigrationId];
+2025-09-20 03:59:23.511 +03:00 [INF] Executed DbCommand (105ms) [Parameters=[@__normalizedName_0='?' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-09-20 03:59:23.916 +03:00 [INF] Now listening on: http://localhost:5146
+2025-09-20 03:59:24.036 +03:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-09-20 03:59:24.040 +03:00 [INF] Hosting environment: Development
+2025-09-20 03:59:24.045 +03:00 [INF] Content root path: E:\Visual Studio Codes\NZWalks\NZWalks.API\NZWalks
+2025-09-20 03:59:24.630 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5146/Swagger/index.html - null null
+2025-09-20 03:59:25.123 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5146/Swagger/index.html - 200 null text/html;charset=utf-8 502.5308ms
+2025-09-20 03:59:25.169 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5146/_framework/aspnetcore-browser-refresh.js - null null
+2025-09-20 03:59:25.169 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5146/_vs/browserLink - null null
+2025-09-20 03:59:25.185 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5146/_framework/aspnetcore-browser-refresh.js - 200 16499 application/javascript; charset=utf-8 15.4954ms
+2025-09-20 03:59:25.241 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5146/_vs/browserLink - 200 null text/javascript; charset=UTF-8 72.2927ms
+2025-09-20 03:59:25.830 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5146/swagger/v1/swagger.json - null null
+2025-09-20 03:59:26.031 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5146/swagger/v1/swagger.json - 200 null application/json;charset=utf-8 200.8498ms
+2025-09-20 03:59:50.012 +03:00 [INF] Request starting HTTP/1.1 GET http://localhost:5146/api/v1/Regions/GetAll?isDescending=false - null null
+2025-09-20 03:59:50.062 +03:00 [WRN] Failed to determine the https port for redirect.
+2025-09-20 03:59:50.283 +03:00 [INF] Authorization failed. These requirements were not met:
+DenyAnonymousAuthorizationRequirement: Requires an authenticated user.
+2025-09-20 03:59:50.303 +03:00 [INF] AuthenticationScheme: Bearer was challenged.
+2025-09-20 03:59:50.312 +03:00 [INF] Request finished HTTP/1.1 GET http://localhost:5146/api/v1/Regions/GetAll?isDescending=false - 401 0 null 299.7756ms

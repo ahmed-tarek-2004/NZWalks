@@ -29,7 +29,7 @@ namespace NZWalks.Controllers.V2
         }
 
         [HttpGet("GetAll")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GetAll([FromQuery] string? Properties = null, [FromQuery] string? order = null
             , [FromQuery] bool? isDescending = false)
         {
